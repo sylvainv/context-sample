@@ -1,0 +1,26 @@
+\unprotect
+\def\doctitle#1{\gdef\@title{#1}}
+\def\supervisor#1{\gdef\@supervisor{#1}}
+\def\secondreader#1{\gdef\@secondreader{#1}}
+\def\author#1{\gdef\@author{#1}}
+\def\date#1{\gdef\@date{#1}}
+\date{\currentdate}  % Default to today unless specified otherwise.
+
+\def\makefirstpage{
+\blank[force,2*big]
+\externalfigure[assets/logo.png]
+\startalignment[left]
+\hairline
+   \blank[2*big]
+   {\tfd \@title}
+   \blank[2*medium]
+   {\em \@author}
+   \blank[2*medium]
+   Supervisor:~\@supervisor \crlf
+   Second reader:~\@secondreader
+   \blank[2*big]
+  \stopalignment
+  \@doctitle
+\hairline
+\page[yes]}
+\protect

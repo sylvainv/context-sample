@@ -1,0 +1,313 @@
+\environment uoeformat
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% FIGURES %%
+%%%%%%%%%%%%%%%%%%%%%%%%
+\setupexternalfigures[directory={figures,code}]
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% MODULE PERSO %%
+%%%%%%%%%%%%%%%%%%%%%%%%
+\usemodule[firstpage]
+  \doctitle{Answering XPath queries in SQL}
+  \author{Sylvain Verly}
+
+\setupcolors[state=start]
+\setuptyping[option=color]
+
+\definetyping[XML][tab=3]
+\definetyping[SQL][tab=3]
+
+\setupinterlinespace[small]
+
+\definedescription[mydesc][
+  headstyle=bold,style=normal,align=left,location=hanging,
+  width=broad,margin=1cm]
+
+\setuppublications[refcommand=num,alternative=num,criterium=all]
+
+\starttext
+
+\makefirstpage
+
+\section{Problem statement}
+
+The objective of this project is to develop a program to translate simple XPath queries posed on DBLP data into equivalent SQL queries. In specific, three parts of the work are described below:
+
+\startitemize[1,packed]
+\item Extract the DBLP XML records and store the records in relations using XML2DB mappings of the following schema: author a published a paper with title t, at conference (or in journal) id , in the particular year.
+\item Write a program that, given an XPath query posed on the DBLP XML records, translates it to an equivalent SQL query on the relational database storing DBLP data.  The XPath queries should be considered: p::= A | * | p/p | p//p | p[q] q ::= p = `c' where 'c' is a constant.
+\item Populate the relations and experimentally evaluate the translation program by answering at least 12 various XPath queries on DBLP XML records.
+\stopitemize
+
+Though XML is undoubtedly becoming a standard for data exchange on the Web, most of XML data are still stored, in terms of certain DTD/schema-based shredding methods, in relational databases, which in turn brings on the need that there should be a way to answer XML queries, XPath queries in this project, by translating them to SQL that could be processed by RDBMS.
+
+\section{Propagating XML data into relations using XML2DB}
+
+In our case, the mapping between XML data and relational tuples are not given. Therefore we need to look into the data and analyze which part of data in XML is mapped to which field of which relation. After that it is necessary to choose one from massive Java APIs for proceeding XML because the XML data used in the project is extremely large and some might not be suitable in our case. A flow chart for our mapping algorithm is given thereafter. At last, some tricks for dealing with irregular data in DBLP are specified.
+
+\subsection{Mapping rules}
+
+After looking into the XML data associated with DTD, corresponding DTD fragment for each relation are revealed and given below:
+
+\startitemize[1,packed]
+\item \type{<! ELEMENT proceedings (booktitle, title)* >} is mapped into \type{conference(id, name).}
+\item \type{<! ELEMENT inproceedings (year, author, title, booktitle)* >} is mapped into \type{publish(year, author, title, id).}
+
+As for DTD fragment \quote{article}, however, things become much more tricky that the text value of the element \type{year}, \type{author}, \type{title} and \type{journal} is mapped into \type{publish.year}, \type{publish.author}, \type{publish.title} and \type{journal.name}. We have no way to find corresponding element whose text value is corresponding to \type{pubish.id} and \type{journal.id}. However the only information can be used for that mapping is the text between the slashes in the \quote{key} attribute of element \quote{article}. Consider following example:
+
+\startXML
+<article key="journals/tods/WuSS10" mdate='2008-10-03'>
+	<journal>ACM Trans. Database Syst.</journal>
+</article>
+\stopXML
+
+\quotation{ACM Trans. Database Syst.} is mapped to \type{journal.name} and \quote{tods} is mapped to \type{journal.id} and \type{journal.id}.
+
+\subsection{SAX: Simple API for XML}
+
+The Simple API for XML (SAX) is an event-driven, serial-access mechanism for accessing XML documents. This protocol is frequently used by servlets and network-oriented programs that need to transmit and receive XML documents, because it's the fastest and least memory-intensive mechanism that is currently available for dealing with XML documents. In our case the XML file is extremely large and other APIs based on DOM, namely J4DOM, DOM4J, are not suitable. Given the following XML document:
+
+\startXML
+<?xml version="1.0" encoding="UTF-8"?>
+<RootElement param="value">
+	<FirstElement>
+		Some Text
+	</FirstElement>
+	<?some\_pi some\_attr="some\_value"?>
+	<SecondElement param2="something">
+		Pre-Text <Inline>Inlined text</Inline> Post-text.
+	</SecondElement>
+</RootElement>
+\stopXML
+
+This XML document, when passed through a SAX parser, will generate a sequence of events like the following:
+
+\startitemize[1,packed]
+\item XML Element start, named RootElement, with an attribute param equal to "value"
+\item XML Element start, named FirstElement
+\item XML Text node, with data equal to "Some Text" (note: text processing, with regard to spaces, can be changed)
+\item XML Element end, named FirstElement
+\item Process Instruction event with the target some\_pi and data some\_attr="some\_value"
+\item XML Element start, named SecondElement, with an attribute param2 equal to "something"
+\item XML Text node, with data equal to "Pre-Text"
+\item XML Element start, named Inline
+\item XML Text node, with data equal to "Inlined text"
+\item XML Element end, named Inline
+\item XML Text node, with data equal to "Post-text."
+\item XML Element end, named SecondElement
+\item XML Element end, named RootElement
+\stopitemize
+
+\subsubsection{Benefits of SAX}
+
+SAX parsers have certain benefits over DOM-style parsers. The quantity of {\em memory} that a SAX parser must use in order to function is typically much smaller than that of a DOM parser. DOM parsers must have the entire tree in memory before any processing can begin, so the amount of memory used by a DOM parser depends entirely on the size of the input data. The memory footprint of a SAX parser, by contrast, is based only on the maximum depth of the XML file (the maximum depth of the XML tree) and the maximum data stored in XML attributes on a single XML element. Both of these are always smaller than the size of the parsed tree itself.
+
+Because of the event-driven nature of SAX, processing documents can often be faster than DOM-style parsers. Memory allocation takes time, so the larger memory footprint of the DOM is also a performance issue. Due to the nature of DOM, streamed reading from disk is impossible. Processing XML documents larger than main memory is also impossible with DOM parsers but can be done with SAX parsers. However, DOM parsers may make use of {\em disk space as memory} to side step this limitation.
+
+\subsubsection{Drawbacks of SAX}
+
+The event-driven model of SAX is useful for XML parsing, but it does have certain drawbacks.
+
+Certain kinds of {\em XML validation} require access to the document in full. For example, a DTD IDREF attribute requires that there be an element in the document that uses the given string as a DTD ID attribute. To validate this in a SAX parser, one would need to keep track of every previously encountered ID attribute and every previously encountered IDREF attribute, to see if any matches are made. Furthermore, if an IDREF does not match an ID, the user only discovers this after the document has been parsed; if this linkage was important to building functioning output, then time has been wasted in processing the entire document only to throw it away.
+
+Additionally, some kinds of XML processing simply require having access to the entire document. XSLT and XPath, for example, need to be able to access any node at any time in the parsed XML tree. While a SAX parser could be used to construct such a tree, the DOM already does so by design.
+
+\subsection{Algorithm for data shredding}
+
+To make our algorithm more comprehensive, an algorithm flow chart associated with pseudocode are given in the \in{figure}[sax].
+
+\starttyping
+While not endDocument()
+	If startDocument()
+		Initial();
+		If startElement()
+			If source= proceedings | inproceedings | article
+				Set parentFlag=source;
+				If  check_parentFlag() & source = child elements of (proceedings | inproceedings | article)
+					(only those elements useful for mapping, namely title, journal .etc)
+					Set subparentFlag=source;
+
+		If endElement()
+			If source= proceedings | inproceedings | article
+				Set parentFlag = empty;
+				Create SQL queries using the data in corresponding objects;
+			If source= any child elements of (proceedings | inproceedings | article)
+				Set subparentFlag= empty;
+
+		If characters()
+			Check parentFlag & subparentFlag
+			Store text values into corresponding objects;
+Execute SQL queries
+\stoptyping
+
+\subsection{Handing irregular data}
+
+During the development of the program, we met three cases of problems. The first case is that the existence of  ‘ and “ in the data which leads to SQL queries with syntax errors. To cope with this problem, the solution is that we simply replace ‘ with ‘’. A concrete example is given below:
+
+\startXML
+<title> VDM '87, VDM ..</title>
+\stopXML
+\startSQL
+insert into reference( ‘VLDB’, ‘1999’s proceedings.....’ )
+\stopSQL
+Solution:
+\startSQL
+insert into reference(‘VLDB’, ‘ 1999’’s proceedings ….’)
+\stopSQL
+
+The second issue involves those escape characters ("\& amp;" , "\& quot;", etc.) and non-standard English words like Moisés. SAX could not handle these characters properly and when it meets these characters, one characters event becomes three characters events. Our solution for this problem is that we create temporary variable to store every piece of the values of these events and when put them together in the end to get the whole information. A concrete example is given below:
+
+\starttyping
+XML: <booktitle>A &amp; real tool …</booktitle>
+Characters events 1: A
+Characters events 2: &
+Characters events 3: real tool…
+Solution: tempVar = tempvar + event(i).value
+\stoptyping
+
+The last issue we met is that it is quite common that there are several authors for one paper. Basically there are two strategies to store the information. The first one is to use the same technique in the above solution. We put all the authors together and then propagate the information into corresponding field of one tuple. However this solution is not ideal for our latter work that is given an XPath query that requires us to return all the papers published by a certain author. There is no way for us to translate an Xpath query into a SQL query that with functionality of splitting the set values into several values and check the value of each of them whether one of them is equal to the value in our query. Even if we could find a technique which enables us to do that, the efficiency could be another serious problem. Therefore we use the second solution whose idea is that for a paper published by several authors, we create a tuple for each of them associated with other necessary data. We give a concrete example to specify our solution:
+
+XML:
+\startXML
+<article key="journals/tods/WuSS10" mdate="2010-02-18">
+	<author>Kesheng Wu</author>
+	<author>Arie Shoshani</author>
+	<author>Kurt Stockinger</author>
+	<title>
+		Analyses
+	</title>
+	<year>2010</year>
+	<journal>ACM Trans. Database Syst.</journal>
+</article>
+\stopXML
+
+SQL:
+\startSQL
+insert into publish (year,title, author, id) values (2010,  ‘Analyses’, ‘Kesheng Wu’, tods);
+insert into publish (year,title, author, id) values (2010,  ‘Analyses’, ‘Arie Shaoshani’, tods);
+insert into publish (year,title, author, id) values (2010,  ‘Analyses’, ‘Kurt Stockinger’, tods);
+\stopSQL
+
+The potential problem of our approach is that our database could possibly be several times lager than corresponding data in XML. However there is no other way around for us to find a better solution.
+
+Apart from the forms of irregular data discussed above, there are some article elements having a key attribute like key="tr/*/*", which usually accompany with the non-existence of author attributes, therefore, we give up this kind of article elements due to having no idea of its meaning.
+
+\section{Query translation: from XPath to SQL}
+
+As written before this project objectives are to develop a program to translate simple XPath.  The type of queries that were to handle do not span the entire possibilities of Xpath but focus on a part of it.  Below are the Xpath definition to handle:
+
+\starttyping
+p ::= A | * | p/p | p//p | p[q]
+q ::= p=`c'
+\stoptyping
+
+The main difficulties that were to handle were recursivity of Xpath (presence of // in a query), and the presence of the star wild card in a query. In order to work properly the algorithm needs:
+
+\startitemize[1,packed]
+\item A function that maps every node in the DTD to its value in the relational database.
+\item A function that gives the possible paths between two nodes.
+\stopitemize
+
+These two functions are precomputed once, prior to the translation, because they only depend, respectively, on the mapping and the DTD. The query translation problem was addressed using by parsing queries into subqueries and handling each subcase as either a finite case or call the function again over these subqueries. \in{Figure}[tree] shows the DTD. Notice it shows the DTD to handle. One can notice it is a tree (which is not always the case for DTD, and it is not recursive).
+
+\placefigure[here][tree]
+{DTD graph}
+{\externalfigure[tree.png][width=15cm]}
+
+\subsection{Mapping}
+
+The query translation functions requires to know the mapping from XML elements to relation or attributes in these relations. Given the work done on XML to DB mapping this is the mapping that is used for this function (on the left hand side). Because the algorithm does recognise nodes by their name and only their name. That is why the mapping is made by nodes name and not regarding their place in the DTD graph. For instance the mapping \type{inproceedings.title} does not exist, instead it is done for \type{inproceedings} and \type{title separately}. But because title is also a descendant of inproceedings title is both mapped to \type{conference.title} and \type{publish.title}. \in{Figure}[map] shows the mapping computed in the algorithm.
+
+\placefigure[here][map]
+{Mapping used for the translation}
+{\externalfigure[mapping.png][width=15cm]}
+
+\subsection{Paths precompute}
+
+The program also requires to pre-compute paths from every node in the DTD to any other node. However here we looked at one particular case of the problem since here the DTD is a tree while in the general case it is a Directed Acyclic Graph. The problem for a DAG is that it is possible to compute theses paths, but it will grow exponentially with the number of nodes in the graph. For a tree this is no problem at all and the computation is very easy.
+
+\subsection{Query Translation:}
+
+The function \type{xpath2sql(xpath, dtdgraph)} translates an xpath query into a relational query given a dtd mapping. This is a recursive function. The algorithm uses a relational query framework to deal with relational queries return by xpath2sql function. The query translation works by subdividing an Xpath query into subqueries. For implementation issues the following case were handled, note it describes exactly the same xpath query as the previous one.
+
+\starttyping
+A ::= proceedings | inproceedings | article | author | title | journal | booktitle | year
+B ::= A | *
+p ::= ϵ | A | p/p | p//p | p[q] | B/*
+q ::= p=`c'
+\stoptyping
+
+For instance a query like \type{/dblp/article/author} would be divided into the following subqueries:
+
+\startitemize[1,packed]
+\item \type{$\epsilon$/dblp}
+\item \type{dblp/article}
+\item \type{article/author}
+\stopitemize
+
+For a query like \type{/dblp/article[/dblp/article/author='bush']/author} would be divided into the following subqueries:
+
+\startitemize[1,packed]
+\item \type{$\epsilon$/dblp}
+\item \type{[/dblp/article/author='bush']}
+\item \type{dblp/article}
+\item \type{article/author}
+\stopitemize
+
+Once the subqueries are defined, the function will build a relational query object that will be the basis for the construction of the relational query returned by the function.
+
+\crlf
+
+In this algorithm 5 cases of subqueries where handled:
+
+\mydesc{A:} this case corresponds to elements in the XML documents.
+\mydesc{p1/p2:} this call xpath2sql(p1) and xpath2sql(p2) there are then merged into the base relational query.
+\mydesc{p1//p2:} thanks to the precompute handled when constructing the DTD graph, the algorithm is able to tell which paths goes from node p1 to p2. If for instance the following case is present:
+
+\externalfigure[mini.png][width=2cm]
+
+Then the function will call xpath2sql(p1/B/p2) and xpath2sql(p1/A/p2) and xpath2sql(p1/A) and xpath2sql(p1/B)
+
+\mydesc{p[q]:} since in q, p='c', p refers only to full path, i.e. it cannot handle relative path, with . or .., the algorithm then handle predicate wherever there are in the xpath query, independent of the node it is 'attached' to. This predicate corresponds to a nested query within a IN predicate in SQL.
+
+\mydesc{B/*:} this case is separated from \type{p1/p2} in the implementation because the star element is a wildcard that corresponds to any element under \type{B}. Therefore the node \type{B} is a nessecary information to compute \type{*}, while in \type{p1/p2}, \type{p1} and \type{p2} are handled indepently for now. Using the case above, \type{p1/*} would return \type{p1/A} and \type{p1/B} and the algorithm would call \type{xpath2sql(p1/A)} and \type{xpath2sql(p1/B)}.
+
+\mydesc{$\epsilon$} does nothing
+
+\subsection{Clean up function}
+
+Once xpath2sql is computed, the algorithm performs a cleanup method to clean the relational query from unnecessary tables included in the query. Indeed because of how p1/p2 is handled, if p1 is mapped into a table and p2 is mapped as an attribute into this table, but also correspond to another attribute in another table, then xpath2sql would put both mapping of p2 into the relational query. This is because p2 and p1 are separately handled. This is why it is necessary to compute the clean up function at the end, because it is not done at runtime.
+
+
+\section{Evaluation and future work}
+\subsection{Query evaluation and optimization}
+The table above demonstrates that our program can handle very complicated cases involved double-slash, wild-card and predicate, however, though all of the translated SQL queries are logically valid, most of them contain nested SELECT, and during our experiments, those SQL queries cannot be run to return a result even when the case was as simple as case 9, we waited for 3 hours without getting a result while the same effective but well optimized SQL query could return a result in seconds. This is resulted from our implementation is mainly based on nested SELECT, therefore, after testing 50 various of XPath queries, it is upset for us to realize that our implementation is unpractical in most cases since the contents stored in the relational database is too big to achieve even only one nested SQL.
+
+Therefore, it is worth noting here that some optimization techniques should be associated with query translation. To address this problem, the key idea is to break the single SQL query given by the translation function into several parts corresponding to the nested queries and execute them separately.  To achieve this, first compute a list of SQL queries corresponding to steps of the original XPath query, and then by introducing the use of Least FixPoint(LFP) operator, it is simple to accomplish the task of separate execution of a list SQL queries while maintaining the same result.
+
+\subsection{Analysis of DBLP data}
+The complexity of real data in the DBLP XML document resulted in a lot problems. For instance, some elements don't have 'key' attribute, some elements lack some descendant nodes while most of its siblings do. Moreover, It is fair to say that the given relational schema is extremely against the DTD and the actual data display.If without the limit on time, we would carry out a more comprehensive analysis of the original DBLP XML document since the too many consistencies within the data did cause a lot of problems during shredding phase. It also inspires our interest of looking into the dirty data problem existing in real life data, which will probably lead us to apply or develop context-related data cleaning technique to preprocess  the DBLP  data stored in the XML document thereby reducing the complexity of XML shredding in the following stage.
+
+\subsection{Parser}
+The parser could a bottleneck of the system because its simplicity, a more powerful parser is extremely desired since the current parser can only return simple pairs of subqueries, and it does not have, if any, capability of detecting the validity of input XPath  queries, which results in even as mistaken as is a XPath  query:
+/author/dblp/article/proceedings/title
+can be accepted and translated to:
+SELECT DISTINCT publish.author, conference.name, publish.title FROM publish, conference.
+
+Besides, since our home-made parser is too simple to recognize any complex syntax or semantics of XPath, the correctness of program can not be ensured, due to the subqueries given by the parser could be misleading. So far we can only debug every mistake encountered in practice by our translation program without any better solution, if given a formal parser, the correctness will be highly guaranteed even under unexpected circumstances.
+
+\subsection{Specification of DTD and schema mapping}
+The analysis of DTD  is not automated. Currently, about the specification of the structure of the given DTD and the corresponding schema mapping is all done by hand, which is not piratical in reality where the DTD is usually far more complicated. In addition, considering the mapping between the given DTD and relational schema specification also needs manual effort, as a result, this could be a huge burden for the use of our technique.
+
+To overcome this, the likelihood is that we will probably be able to develop a semi-automated analyzer which can deal with a DTD and a schema mapping provided by user manually. To be more precise, this analyzer will only assist the specification that can be processed by following program rather than really take over all the job done by user.
+
+\subsection{Inconsistency of translation}
+There could be inconsistency between the original XPath query and the SQL query generated by our program. Because, firstly, our XPath parser's correctness can't be ensured at the moment, it has not been tested in more complicated situations though it works well in our setting, as we have mentioned that the setting in our case is relatively simple. Therefore, so far we believe that there exist some unexpected cases that will fail our query translation program. And it is noticeable that,the case 12 of in our translation table is not perfect as it contains redundant table in the FROM clause though its effect is same. Currently for this kind of cases, we have done debugging because we are not sure about whether our debugging will trigger more inconsistencies, and the reason is again related with the unexpected correctness due to the simple parser.
+
+\subsection{Conclusion}
+To sum up, in this project, we developed a program which can translate a fragmented XPath queries posed on the DBLP XML document into SQL queries which can retrieve the same information from a corresponding relational database that is shredded, by the first part of our work, from the DBLP XML document.Although so far the program performs stably and correctly, our work is far from the finishing line due to the series of analyses listed above. To orchestrate our program to be better in the near future could rely on query optimization and  semi-automated analyzer for DTDs and schema mapping, but to make our program of commercial value, the attention should focus on implementing or finding a proper parser and a comprehensive analysis of DBLP data even related data cleaning techniques such that this work can be sound.
+
+\completepublications
+
+\stoptext

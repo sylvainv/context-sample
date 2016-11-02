@@ -1,0 +1,1435 @@
+\enableregime	[utf]% choose input encoding: (in LuaTeX and XeTeX, UTF-8 is on by default, thus not needed)
+\mainlanguage	[en]
+
+\setupinteraction[state=start] % don't forget this line!
+% make chapter, section bookmarks visible when opening document
+\placebookmarks[chapter,section,subsection][chapter,section]
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% LAYOUT %%
+%%%%%%%%%%%%%%%%%%%%%%%%
+\setuppapersize[A4][A4]
+\setuplayout[backspace=25mm,
+	width=160mm,
+	topspace=25mm, top=0mm,
+	header=10mm, footer=10mm,
+	height=250mm]
+\setupindenting[medium]
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% ITEMIZE %%
+%%%%%%%%%%%%%%%%%%%%%%%%
+%\setuptyping[before=option=commands]
+\setupitemize[each][headstyle=bold]
+
+\setupframed[corner=round]
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% HEADERS AND FOOTER %%
+%%%%%%%%%%%%%%%%%%%%%%%%
+\setuppagenumbering[location=]
+
+\setupheader[text][state=high,style=\tfx]
+\setupheader[margin][state=high,style=\tfx]
+\setupheadertexts[margin][][chapternumber]
+\setupheadertexts[text][chapter][]
+
+\setupfooter[margin][style=\tfx]
+\setupfootertexts[margin][][pagenumber]
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% FONT %%
+%%%%%%%%%%%%%%%%%%%%%%%%
+\setupbodyfont[ss,11pt]
+\definebodyfont [10pt,11pt,12pt] [ss] [tff=SansBold at 48pt]
+\definebodyfont [10pt,11pt,12pt] [ss] [tfe=SansBold at 30pt]
+\setupinterlinespace[big]
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% COLOR %%
+%%%%%%%%%%%%%%%%%%%%%%%%
+\setupcolors[state=start]
+\definecolor[gray][s=0.55]
+
+%% B Method %%
+\definecolor[Bcomment][r=0.1,g=0.8,b=0.1]
+\definecolor[Bkeyword][r=0.2,g=0,b=1.0]
+\definecolor[Bverbatim][r=0.9,g=0.3,b=0.3]
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% COMMANDES %%
+%%%%%%%%%%%%%%%%%%%%%%%%
+\def\NumberChapter#1%
+	{\startmarginblock
+		{\framed[width=2cm,
+		background=screen,
+		backgroundscreen=0.9,
+		frame=off]
+		{\tff #1}}
+	\stopmarginblock}
+
+\def\loadB#1{\tt \indenting[no] \setupinterlinespace[small] \startpacked \tfx \input code/#1.tex \tf \stoppacked \setupinterlinespace[big] \indenting[yes] \ss}
+
+\def\loadBExample#1{\startnarrower \loadB{#1} \stopnarrower}
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% TITLES %%
+%%%%%%%%%%%%%%%%%%%%%%%%
+\setupheads[alternative=]
+
+\setuphead[chapter]
+	[numbercommand=\NumberChapter,
+	header=high,
+	style=\tfe \bfd,
+	distance=0pt,
+	page=right,
+	continue=no]
+
+\setuphead[section]
+	[style=\bfc]
+
+\setuphead[subsection]
+	[style=\bfb]
+
+\setuphead[subsubsection]
+	[style=\bfa]
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% FIGURES %%
+%%%%%%%%%%%%%%%%%%%%%%%%
+\setupexternalfigures[directory={figures,code}]
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% TABLE OF CONTENTS %%
+%%%%%%%%%%%%%%%%%%%%%%%%
+\definelist[chapter]
+	\setuplist
+	  [chapter]
+	  [before=\blank,
+	  alternative=b,
+	  style=bold]
+
+\definelist[section]
+	\setuplist
+	  [section]
+	  [alternative=c]
+
+\definelist[subsection]
+	\setuplist
+	  [subsection]
+	  [alternative=c]
+
+\definelist[subsubsection]
+	\setuplist
+	  [subsubsection]
+	  [distance=10mm,alternative=c]
+
+\definecombinedlist
+	[content]
+	[chapter,section,subsection,subsubsection]
+	[level=subsubsection]
+
+\definedescription[definition][location=hanging,indentnext=no,width=fit,align=right,headstyle=bold]
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% BIBLIOGRAPHY %%
+%%%%%%%%%%%%%%%%%%%%%%%%
+\usemodule[bib]
+\setupbibtex[database=dissertbib,sort=author]
+\setuppublications
+	[alternative=ams,
+	sorttype=bbl,
+	refcommand=num,
+	numbering=yes]
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% MODULE PERSO %%
+%%%%%%%%%%%%%%%%%%%%%%%%
+\usemodule[firstpage]
+  \doctitle{NASA's SAFER using B-Method}
+  \supervisor{Andrew Ireland}
+  \secondreader{David Corne}
+  \author{Sylvain Verly}
+
+\usemodule[appendixpage]
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% COMMANDES PERSO %%
+%%%%%%%%%%%%%%%%%%%%%%%%
+\def\GN {GN\low{2}}
+\def\leftarrowfill{\mtharrowfill \leftarrow \relbar \relbar}
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% DOCUMENTS %%
+%%%%%%%%%%%%%%%%%%%%%%%%
+\starttext
+	\indenting[yes]
+
+	\setuppagenumber[state=stop]
+	%% First page %%
+	\makefirstpage
+
+\startfrontmatter
+	%% Declaration %%
+	\title{Declaration}
+	I, Sylvain Verly confirm that this work...
+
+	%% Abstract %%
+	\title{Abstract}
+
+	The SAFER backpack propulsion system is a device designed by NASA. It helps an astronaut, in case of accidental separation from the spacecraft during an activity in space, to return to his space shuttle. It includes all the necessary equipement for such a mission as well as a software to control inputs and outputs of the system. This kind of system is called \quote{critical} as a failure in the system could result in a major impact on security of astronauts, or in the lost of a large amount of money. The key objective of such a development is to build a system that respects what is stated in the specification. This is why formal methods are used.
+
+	This project aims to develop a working software system for the backpack from the NASA specification using B-method. The software should response properly to inputs given by the astronaut. A key objective is to develop a deep understanding of how the B-method works. The SAFER specification has been previously analysed using two other formal methods, {\em i.e.} PVS and VDM. Using the SAFER example it will be possible to compare the results of using B-Method with the results of these two previous approaches carried out.
+
+	%% Table of Contents %%
+	\completecontent
+
+	\setuppagenumber[state=start]
+\stopfrontmatter
+
+\startbodymatter
+
+	%%%%%%%%%%%%%%%%%%%%%%%%
+	%% INTRODUCTION %%
+	%%%%%%%%%%%%%%%%%%%%%%%%
+	\chapter{Introduction}
+
+	The SAFER\footnote{SAFER stands for {\em Simplified Aid For EVA Rescue}.} backpack propulsion system is a device designed by NASA. It helps an astronaut, in case of accidental separation from the spacecraft during an EVA\footnote{EVA stands for {\em Extra-Vehicular Activity}, also called \quote{spacewalk}.}, to return to his space shuttle. It includes all the necessary equipement for such a mission as well as a software to control inputs (commands given by an astronaut) and outputs (set of thrusters to be fired distribited all around the SAFER system) of the system.
+
+	This kind of system is called \quote{critical} as a failure in the system could result in a major impact on security of astronauts, or in the lost of a large amount of money. The key objective of such a development is to build a system that respects what is stated in the specification, in other words that the software does not contain bugs. This is why formal methods are used.
+
+	Formal methods provide a high level of trust. They are based on rigourous definition of a system thanks to the formalisation of a specification using a language that does not allow ambiguities. Usually mathematical notation and theories from mathematics are used. However it is important to keep in mind a formal method does not offer the need for creativity, and that a perfect command of the method used is necessary.
+
+	\crlf
+
+	This project aims to develop a working software system for the backpack from the NASA specification using B-method. The software should response properly (as stated in the specification) to inputs given by the astronaut. Obviously as no SAFER are available at Heriot-Watt University, a set of appropriate outputs will be implemented in order to test the software. A key objective is to develop a deep understanding of how the B-method works, its strengths and limitations. The SAFER specification has been previously analysed using two other formal methods, {\em i.e.} PVS and VDM. Using the SAFER example it will be possible to compare the results of using B-Method with the results of these two previous approaches carried out.
+
+	\crlf
+
+	This report will first present a short background introduction on formal methods. It will be presented the two main aspects of it: specification and proof verificiation. In particular, PVS and VDM, but also Z notation will be introduced. Indeed they have inspired the creator of the B-Method. The SAFER system will be presented, its purpose and a short description of the embeded software. It will be introduced as a background litterature review, necessary to fully understand this project.
+
+	A chapter on B-Method will be addressed, it is based on the experience gathered throughout this project as well as the short background knowledge gathered during my years when I was studying B in France. Even though it is not written in the chronological order (the experiences gathered throughout a project should come after the description of this one), I have decided to present it before the description of the project because it is important to have a background knowledge before reading it. This part will roughly be splitted into 3 parts: first the presentation of the different levels of abstraction and second the different design solution available in the B-Method, finally a short part would look at code checking and proof.
+
+	The next chapter addresses the project itself: NASA's SAFER using B-Method. It will first of all present the architecture design sustained compare to what was originally planned. Finally the different components of the system will be presented as well as a short summary on proof.
+
+	At last a short comparison between B method and PVS and VDM will be carried out. This chapter will be short as these different methods undertook were quite different regarding the version developed in this report.
+
+
+	%%%%%%%%%%%%%%%%%%%%%%%%
+	%% BACKGROUND %%
+	%% discussing relation work found in the technical
+	%% literature and its relevance to the project
+	%%%%%%%%%%%%%%%%%%%%%%%%
+	%\chapter{Background}
+
+	%%%%%%%%%%%%%%%%%%%%%%%%
+	%% CENTRAL PART %%
+	%%%%%%%%%%%%%%%%%%%%%%%%
+
+	\chapter[bg]{Background}
+
+	\section[formal-methods]{Formal Methods}
+
+	\subsection[fm-intro]{Introduction}
+
+	A formal method is a technique based on rigorous mathematics concepts for the development of hardware or software systems. It aims to demonstrate their validity over their respective specifications. Formal methods provide a high level of guarantee, assuring a system to be free of bugs.
+
+	However there are costly in terms of human resources and time. Indeed, high skilled persons are required, and the development of such systems is time-expensive. Although not 100\% reliable, they provide much better level of trust than any informal methods. Therefore, they are used in the development of critical systems, {\em i.e.} systems that involve human lifes and/or a large amount of money ({\em e.g.} the launch of a space shuttle\footnote{this case is interesting to underline, because of Ariane 5 Flight 501  failure, due to a software bug (see ESA report \cite[A501report] for more information).}).
+
+	There are numerous several methods, carrying out different approaches, and implementing different aspects of formal methods. The \in{subsection}[fm-presentation] will focus on Z notation, a method created by Jean-Raymond Abrial\footnote{Jean-Raymon Abrial is the initiator of the B-method.}, PVS (Prototype Verification System) a method to formally specify and VDM (Vienna Development Model) a method whose Jean-Raymond Abrial has been inspired by to create the B-method.
+
+	\subsection[fm-approach]{Formal methods' approach}
+
+	A standard development approach such as the use of informal methods, starts from a set of requirements, stated in natural language. It aims to reach a working system, through several steps, such as conception, modules description, etc. Amongst which, some verification steps are carried out, to check that everything matches the requirements.
+
+	A formal method's approach almost follow the same pattern. However it uses logic, as well as mathematical concepts and theories. Most important parts, and common to all formal methods are specification and, proof verification.
+
+	\startitemize[1]
+
+	\item {\bf Specification:} formal methods can be used to give a specification to a system. A formal specification is based on a formal language, peculiar to each method, with a precise semantic, avoiding misinterpretations. This formal description is used throughout the development process to ensure the final result satisfies the informal specification (translated into formal specification). A good formal specification is ideally abstract \cite[extras={, page 6}][DcssiMf],  {\em i.e.} doesn't consider implementation in a target system.
+	\startnarrower
+	\noindent Here is a simple example, with mathematic notation as formal language.
+	\startitemize[2,packed]
+	\item {\bf Informal description:} every person loves the ones who love them.
+	\item {\bf Formal description:}
+		\startitemize[3,packed]
+		\item $love \in PERSON \leftrightarrow PERSON$ \crlf
+		This means that $love$ is relation between two persons. The symbol $\leftrightarrow$ indicates that it could be any relation.
+		\item $\forall p,q \bullet (p \in PERSON \wedge q \in PERSON \wedge (p \mapsto q) \in love \Rightarrow (q \mapsto p) \in love $
+		\item $love = love^{-1} $\crlf
+		Means that $love$ is equal to its own reverse (the relation described above \quotation{works in both way}).
+		\stopitemize
+	\stopitemize
+	\stopnarrower
+
+	Some formal methods (whose B-Method) include several different levels of abstraction in a specification. Each level aims to be proofed by formal verification and proof. The different levels go from abstraction to a more concrete model, called implementation. The step to go from the former to the latter is called {\em refinement}. We will discuss it in more details in an other section.
+
+	\item {\bf Proof verification:} a formal specification aims to be proved, in order to check its consistency. We don't want an expression such as $0 = 1$ to sneak into our specification. Of course this example is pretty obvious, but it will rarely be the case.
+
+	There are several ways to carry out the proof process. This can be done by hand, despite being a long task. Z notation, that will see later on in this report, is a perfect example of formal method where proof verification are carried out by hand. The most common way to proove a system is to use an automatic proover. A tool peculiar to the method used is needed. Given a set of axioms, and inference rules, such a tool can proof some properties of a specification. However it is rarely fully automatic. It needs some guidance from a human being. Indeed, a proover could check thousands of uninteresting states if not guided by human (who knows, those states of proof are irrelevant).
+	\stopitemize
+
+	\subsection[fm-presentation]{Presentation of some formal methods}
+
+	As seen above there are numerous formal methods. All these don't necessarily go all the way to a complete implementation of a working system. Some of them only provide languages for specification and manual formal verification, some others provide computerized tools to verify consistency of abstract machines, some others offer tools to implement abstract machines into a target language, etc. This report will adress Z notation, PVS, VDM, and of course B-Method in which we are interested in.
+
+	In addition, as mentioned on DCSSI report \cite[extras={, page 6}][DcssiMf] :
+
+	\startquotation
+		{\em {\fr L'utilisation d'une méthodologie formelle de développement doit reposer sur l'utilisation d'un ensemble d'outils constituant une implémentation de la méthode formelle.}}
+	\stopquotation
+
+	This can be translated as: \quotation{{\em The use of formal approaches has to rely on a set of tools, designed as an implementation of the formal method.}} This is important to bear in mind when choosing a formal approach for development. Even though it is possible to carry out verification by hand as proposed on Z notation, this solution is not viable on significant sized project.
+
+	\subsubsection[fm-znotation]{Z notation}
+
+	\indenting[no]
+
+	Z is a notation based on mathematics, to describe software or hardware system. It uses {\em set theory} and {\em predicate logic} to express that system, and therefore helps the formalization of it. A system described in Z comprises:
+
+	\startitemize[1,packed]
+	\item a {\em state} of the system which tells us {\em what} the system is, through a collection of state variable and their values,
+	\item a collection of {\em operations} that can change this state.
+	\stopitemize
+
+	A Z specification is organised with schemas. The following figure demonstrate the structure of a schema and is used to define state or operations:
+
+	\setuptextrules[location=left]
+
+	\startnarrower[4*left,4*right]
+	\textrule[top]{Schema Name}
+	 Declarations
+	\hairline
+	 Predicate
+	\textrule
+	\stopnarrower
+
+	As an example, let's write a door system using Z notation:
+	\startitemize[1,packed]
+	\item a door is in the state closed or opened,
+	\item it can switch from one state to another respectively by operations open and close,
+	\item a door is initially closed.
+	\stopitemize
+
+	\startnarrower[4*left,4*right]
+	\textrule[top]{STATE}
+	\math{doorState \in \{opened, closed\}}
+	\textrule
+	\stopnarrower
+
+	This schema defines the set STATE defined by the two elements {\em opened} and {\em closed}.
+
+	\startnarrower[4*left,4*right]
+	\textrule[top]{Initialisation}
+	\math{\Delta STATE}
+	\hairline
+	\math{doorState' = closed}
+	\textrule
+	\stopnarrower
+
+	This schema defines an initialisation operation. \math{\Delta}~\math{STATE} defines a schema that is allowed to be modified, and {\em doorState'} represents the variable {\em doorState} after modification. Here, the schema \math{STATE} is modified as we changed the state of the variable {\em doorState}.
+
+	\startnarrower[4*left,4*right]
+	\textrule[top]{Close}
+	\math{\Delta STATE}
+	\hairline
+	\math{doorState \neq closed}
+	\math{doorState' = closed}
+	\textrule
+	\stopnarrower
+
+	\startnarrower[4*left,4*right]
+	\textrule[top]{Open}
+	\math{\Delta STATE}
+	\hairline
+	\math{doorState \neq opened}
+	\math{doorState' = opened}
+	\textrule
+	\stopnarrower
+
+	In these two operations we had the notion of precondition\footnote{This notion is largely used in B method, and in software development in general}, {\em i.e.} here we cannot open a door already opened, neither close a door already closed\footnote{It doesn't really change anything to state the {\em doorState} variable become {\em opened} instead of {\em opened} in this case. We might think these preconditions are unecessary. However our door system, doesn't state that opening a door already open is allowed. Imagine this door system is designed for an aircraft! A precondition checking the variable values is then necessary.}.
+
+	Z notation is not a method but just a notation. For a long time, it was used with just a piece of paper and a pencil. Today a set of tools exists for formatting, type-checking, and helping for proofs.
+
+	\indenting[yes]
+
+	\subsubsection[fm-pvs]{Prototype Verification System (PVS)}
+
+	PVS is a computerized environment designed for formal specification and formal verification. It provides \cite[PVSweb]:
+	\startitemize[1,packed]
+	\item {\bf a specification language:} it is based on predicate logic. A PVS specification is defined as a set of theories. A theory includes signature for types, constants and axioms, definitions and theorems associated with this signature.
+	\item {\bf predefined theories:} PVS includes a set of predefined theories. For instance, the theory {\em booleans} introduces:
+		\startitemize[2,packed]
+		\item the nonempty type \type{boolean},
+		\item the elements \type{TRUE} and \type{FALSE},
+		\item operators such as \type{AND}, \type{OR}, implies $\xRightarrow$, \type{WHEN} and equivalence $\xLeftrightarrow$.
+		\stopitemize
+	\item {\bf a type checker:} this tool is concerned with checking a specification is logically correct, and that no errors are found in the specification.
+	\item {\bf theorem proover:} a proof is made once a specification has been successfully type-checked. The PVS theorem proover is composed of a set of basic theorems and axioms. A proof is interactive and is carried out by the user who defines proof strategies through a set of commands which control the use of theorems and axioms.
+	\stopitemize
+
+	PVS is distributed under General Public License, and is available on Linux, Mac and Solaris.
+
+	\subsubsection[fm-vdm]{Vienna Development Model (VDM)}
+
+	The VDM development started in a Vienna IBM Laboratory \cite[VDMISO] in 1970. It introduces a new development paradigm: the refinement. This step aims to transform an abstract specification (close to the problem domain) into a concrete specification (close to the machine or to the target language). VDM discerns two different refinement processes~\cite[VDMZ]:
+	\startitemize[1,packed]
+	\item {\bf Data reification:} the refinement of abstract data types (such as sets, sequences, etc.) into data structures (such as arrays, records, etc.).
+	\item {\bf Operations decomposition:} the refinement of operations and functions defined in the abstract specification. An abstract specification describes {\em what} do operations do rather than {\em how}. The refinement process, adds {\em explicit} information (such as algorithm) describing how an operation is carried out. This {\em explicit} information is close to a target implementation language.
+	\stopitemize
+
+	The language of VDM is VDM-SL and supports VDM's different levels of abstraction.
+
+	\subsection{Conclusion}
+
+	As just adressed, there are many different formal methods. We were particularly interested in Z notation and VDM because the B-Method has been inspired by these two. PVS has been used to formally specify the SAFER system that will be adressed in an other section.
+
+	\section[safer]{SAFER: Simplified Aid For EVA Rescue}
+
+	\subsection{Introduction}
+
+	The SAFER is a streamlined version of MMU (Manned Maneuvering Unit). It allows a crewmember of a spacecraft, or space station to be engaged in EVA in a safer way. Compared to MMU, the SAFER is lighter, and designed for contingency only, {\em i.e.} as a self-rescue device. Spacewalk with SAFER are always tethered, i.e. the crewmember is attached to space station. However, for some numerous reasons, the tether can break and the crewmember will find himself floating away from his station, with no or little chance for him to come back. This is why SAFER has been designed.
+
+	It fits around the space suit\footnote{also called Extravehicular Mobility Unit (EMU)} as shown on \in{figure}[emu]. A hand held controller unit is attached in front of the crewmember's EMU. It allows him to perform the six degrees of freedom\footnote{translation on each axis X, Y and Z, and rotation pitch, yaw and roll} (see \in{figure}[sixdegree])\footnote{There are some constraints on how a crew member might input a thrust. The hand controller is equipped with a MODE command that has 2 possible states TRANSLATION mode and ROTATION mode. When TRAN mode is on $\pm$X, $\pm$Y, $\pm$Z, $\pm$pitch are available and when ROT mode is on, $\pm$roll, $\pm$pitch, $\pm$yaw and $\pm$X are available.}
+
+	The SAFER uses 24 gaseous-nitrogen (\GN) thrusters, distributed all around.
+
+	\placefigure[here][emu]
+		{SAFER attached to Extravehicular Mobility Unit \cite[extras={, figure C.1}][NASAGB00197]}
+		{\externalfigure[emu.png]}
+
+	\placefigure[here][sixdegree]
+		{Six degrees of freedom \cite[extras={, part of figure C.3}][NASAGB00197]}
+		{\externalfigure[sixdegree.png]}
+
+	\subsection[safer-software]{System Software}
+
+	The system software or avionics software is responsible for controlling the SAFER depending on crewmember commands. It is composed of two main subsystems:
+	\startitemize[1]
+	\item {\bf Maneuvering control subsystem:} this system aims to receive input from the Hand Controller and output acceleration command to the thrusters. It comprises of two subsystems: the command interpreter subsystem that receive input from hand held controller, and an automatic attitude hold subsystem (AAH) that is designed to keep rotation rates close to zero. This is the combination of these two subsystems that will produce a single acceleration command. The AAH can be switched off at any time by the crewmember.
+
+	However the thruster command output is subject to various constraints, {\em e.g.} only one translational axis at a time receives acceleration, four thrusters maximum turned on simultaneously, etc. These constraints are summed up into a selection logic table (see \in{table}[selectionlogicxpy] and \in{table}[selectionlogicyzr]) with three possible values for each axis: negative thrust -, positive thrust + or no thrust at all. The thrusters are shown in \in{figure}[thrustername]. Each thruster is designated by a letter indicating the direction of forces applied on the SAFER: U for Up, D for Down, B for Back, F for Forward.
+
+	\item {\bf Fault detection subsystem:} this system performs testing function to detect fault during and before an EVA and manages the display interface.
+	\stopitemize
+
+	The \in{figure}[archi] shows the architecture and flows of the SAFER system.
+
+	\startbuffer[selectionlogicxpy]
+		\starttable[|c|c|c|l|l|]
+		\HL
+		\VL X \NC Pitch \NC Yaw \VL Always turned on \VL On if no roll command \VL\AR
+		\HL
+		\VL - \NC - \NC - \VL B4 \VL B2 B3 \VL\AR
+		\VL - \NC - \NC   \VL B3 B4 \VL  \VL\AR
+		\VL - \NC - \NC + \VL B3 \VL B1 B4 \VL\AR
+		\HL
+		\VL - \NC   \NC - \VL B2 B4 \VL   \VL\AR
+		\VL - \NC   \NC   \VL B1 B4 \VL B2 B3 \VL\AR
+		\VL - \NC   \NC + \VL B1 B3 \VL   \VL\AR
+		\HL
+		\VL - \NC + \NC - \VL B2 \VL B1 B4 \VL\AR
+		\VL - \NC + \NC   \VL B1 B2 \VL \VL\AR
+		\VL - \NC + \NC + \VL B1 \VL B1 B4 \VL\AR
+		\HL
+		\VL   \NC - \NC - \VL B4 B1 \VL   \VL\AR
+		\VL   \NC - \NC   \VL B4 F2 \VL   \VL\AR
+		\VL   \NC - \NC + \VL B3 F2 \VL   \VL\AR
+		\HL
+		\VL   \NC   \NC - \VL B2 F1 \VL   \VL\AR
+		\VL   \NC   \NC   \VL       \VL   \VL\AR
+		\VL   \NC   \NC + \VL B3 F4 \VL   \VL\AR
+		\HL
+		\VL   \NC + \NC - \VL B2 F3 \VL   \VL\AR
+		\VL   \NC + \NC   \VL B1 F3 \VL   \VL\AR
+		\VL   \NC + \NC + \VL B1 F4 \VL   \VL\AR
+		\HL
+		\VL + \NC - \NC - \VL F1    \VL F2 F3 \VL\AR
+		\VL + \NC - \NC   \VL F1 F2 \VL   \VL\AR
+		\VL + \NC - \NC + \VL F2    \VL F1 F4  \VL\AR
+		\HL
+		\VL + \NC   \NC - \VL F1 F3 \VL   \VL\AR
+		\VL + \NC   \NC   \VL F2 F3 \VL F1 F4 \VL\AR
+		\VL + \NC   \NC + \VL F2 F4 \VL   \VL\AR
+		\HL
+		\VL + \NC + \NC - \VL F3 \VL F1 F4 \VL\AR
+		\VL + \NC + \NC   \VL F3 F4 \VL  \VL\AR
+		\VL + \NC + \NC + \VL F4 \VL F2 F3  \VL\AR
+		\HL
+		\stoptable
+	\stopbuffer
+
+	\startbuffer[selectionlogicyzr]
+		\starttable[|c|c|c|l|l|]
+		\HL
+		\VL Y \NC Z \NC Roll \VL Always turned on \VL On if no pitch or yaw \VL\AR
+		\HL
+		\VL - \NC - \NC - \VL \VL \VL\AR
+		\VL - \NC - \NC   \VL \VL \VL\AR
+		\VL - \NC - \NC + \VL \VL \VL\AR
+		\HL
+		\VL - \NC   \NC - \VL L1R \VL L1F L3F \VL\AR
+		\VL - \NC   \NC   \VL L1R L3R \VL L1F L3F \VL\AR
+		\VL - \NC   \NC + \VL L3R \VL L1F L3F \VL\AR
+		\HL
+		\VL - \NC + \NC - \VL \VL \VL\AR
+		\VL - \NC + \NC   \VL \VL \VL\AR
+		\VL - \NC + \NC + \VL \VL \VL\AR
+		\HL
+		\VL   \NC - \NC - \VL U3R \VL U3F U4F \VL\AR
+		\VL   \NC - \NC   \VL U3R U4R \VL U3F U4F \VL\AR
+		\VL   \NC - \NC + \VL U4R \VL U3F U4F \VL\AR
+		\HL
+		\VL   \NC   \NC - \VL L1R R4R \VL   \VL\AR
+		\VL   \NC   \NC   \VL       \VL   \VL\AR
+		\VL   \NC   \NC + \VL R2R L3R \VL   \VL\AR
+		\HL
+		\VL   \NC + \NC - \VL D2R \VL D1F D2F \VL\AR
+		\VL   \NC + \NC   \VL D1R D2R \VL  D1F D2F  \VL\AR
+		\VL   \NC + \NC + \VL D1R \VL  D1F D2F  \VL\AR
+		\HL
+		\VL + \NC - \NC - \VL \VL \VL\AR
+		\VL + \NC - \NC   \VL \VL \VL\AR
+		\VL + \NC - \NC + \VL \VL \VL\AR
+		\HL
+		\VL + \NC   \NC - \VL R4R \VL R2F R4F \VL\AR
+		\VL + \NC   \NC   \VL R2R R4R \VL R2F R4F \VL\AR
+		\VL + \NC   \NC + \VL R2R \VL R2F R4F \VL\AR
+		\HL
+		\VL + \NC + \NC - \VL \VL \VL\AR
+		\VL + \NC + \NC   \VL \VL \VL\AR
+		\VL + \NC + \NC + \VL \VL \VL\AR
+		\HL
+		\stoptable
+	\stopbuffer
+
+	\placetable[here][selectionlogicxpy]
+		{Thruster selection table for X, pitch and yaw commands \cite[extras={, table C.2}][NASAGB00197]}
+		{\externalfigure[selectionlogicxpy.tmp][height=.5\textheight,width=.8\textwidth]}
+
+	\placetable[here][selectionlogicyzr]
+		{Thruster selection table for Y, Z and roll commands \cite[extras={, table C.3}][NASAGB00197]}
+		{\externalfigure[selectionlogicyzr.tmp][height=.5\textheight,width=.8\textwidth]}
+
+	\placefigure[here][thrustername]
+		{Thrusters designation \cite[extras={, part of figure C.3}][NASAGB00197]}
+		{\externalfigure[thrustername.png][width=10cm]}
+
+	\placefigure[here][archi]
+		{Architecture of the SAFER system  \cite[extras={, figure C.7}][NASAGB00197]}
+		{\externalfigure[architecture.png][width=15cm]}
+
+	\chapter[bmethod]{B-method: a short description}
+
+	\section[bm-intro]{Introduction}
+
+	\startquotation
+		{\em {\bf B} is a method for specifying, designing, and coding software systems.}
+	\stopquotation
+		\rightaligned{\cite[alternative=authoryears,extras={, page xv}][BBook]}
+
+	\noindent {\em {\bf Note:} this section relies for a major part on The B-Book \cite[BBook] and Henri Habrias\footnote{Henri Habrias was teaching B-Method in the University of Nantes (France).} handouts 1 and 2~\cite[PolyB].}
+	\crlf
+
+	B-Method is a formal method introduced by Jean-Raymond Abrial. Many ideas of B-Method are derived from VDM as he had collaborated with C.B. Jones (who had been involved in the VDM project), and from Z, as J.R. Abrial is one of the originators of the notation. As he stated, the B method intends to include all steps from specification to code. \crlf
+
+	\noindent The term B includes several different aspects that need to be clearly differentiated:
+
+	\startitemize[1,packed]
+	\item {\bf Method:} B is a formal method. It provides an approach for \quotation{specifying, designing, and coding software systems}, and also formal verification.
+	\item {\bf Language:} B-Method provides one common language for each step of the B approach (specifying, refining, implementing).
+	\item {\bf Set of tools:} as seen before, a good formal method includes a set of tools implementing it. B-Method provides proover and code generation tools.
+	\stopitemize
+
+	\noindent Moreover the method proposed by Abrial, covers:
+
+	\startitemize[1]
+	\item {\bf Formal specification:} expression of an informal statement into a formal one thanks to B language. Each module identified in the informal specification can be translated into one abstract machine. This includes specification of data (like in Z, it uses the set theory and predicate logic), and specification of operations. Each of them are defined by a precondition (without which the operation cannot be executed if the condition is not reached), and an action that describes {\em what} the operation does. This last one is expressed as an atomic action and that does not contain sequencing and loops. It leaves a larger scope of decision for a later refinement.
+
+	\item {\bf Type-Checking:} {\em \quotation{any predicate involving set-theoritic constructs [shall] be {\em type-cheked} before being proved}} \cite[extras={, page 64}][BBook]. Type-checking is concerned with checking a formal statement and operations of an abstract machine \quotation{do make sense}. It aims to forbid the manipulation of terms authorised by the B syntax.
+
+	\item {\bf Refinement and Proof:} a specification is intended to be \quote{translated} into an executable code. This is done by carrying on successive refinement steps. As while the refinement process goes, programming structures (loop, sequencing, etc.), and programmable types (arrays, files, etc.) are added to the refined machine, towards implementation machine. The refined machine, intermediate state between an abstract machine and implementation, is a cross between these two. It is not a mathematical model anymore, but not a programmable machine yet.
+
+	Each step of the refinement process has to be prooved in order to show that it satisfies the specification. This operation is carried out by an automatic proover.
+
+	\item {\bf Code generation:} this is the last step of the method. It consists of translating (using an automatic tool), an implemented machine into an imperative programming language.
+	\stopitemize
+
+	\section{Different level of abstraction}
+
+	\subsection[bm-am]{Abstract machine}
+
+	An abstract machine defines the boundaries in which operates the concepts of abstract specification. It identifies specification and operations. The key word of an abstract machine in B is \type{MACHINE}.
+
+	\subsubsection[am-structure]{Structure}
+
+	Every abstract machine structure in B-method follow the same pattern. A machine needs:
+
+	\startitemize[1]
+	\item {\bf Basic sets:} these will be used to define the types of variables. For instance a set \type{SWITCH} could be defined by \math{\{on,off\}}. Such sets are {\em none empty} and incommensurable. This means that if $A$ and $B$ are two basic sets, writing something like \math{A \cup B} or \math{A \subseteq B} is forbidden. This is a typing error! However something like \math{A \times B} or \math{A \leftrightarrow B} and so on are allowed.
+
+	Due to that incommensurability, an issue related to empty sets is raised. For instance, let's define two variables $aa$ and $bb$, with \math{aa \subseteq A}, \math{bb \subseteq B}. If we initialise the two variables: \math{aa := \{\}} and \math{bb := \{\}}, can we affirm that \math{aa = bb}? The answer is no! These are two different empty sets. A parallel can be done with really strong typed languages, if $aa$ is of \type{float} and $bb$ is of type \type{integer}, with \math{aa := 0.0} and \math{bb := 0}, comparing $aa$ and $bb$ would not be allowed.
+
+	\item {\bf Variables:} a machine uses variables to formalize an informal specification. Variables are declared abstract by default, although it is possible to declare them concrete in an abstract machine. A concrete variable can only be declared given concrete types. \type{INTEGER}, \type{NATURAL} are examples of concrete types whereas basic sets for instance are abstract types. Concrete typing in a machine reduces the range of possibilities variables offers for specification\footnote{supposed ideally abstract, see \in{section}[bm-intro].}, that's why they are abstract by default.
+
+	\item {\bf Invariant:} it defines types of variables, and properties of variables. For instance a variable $switch$. The typing invariant is \math{switch \in SWITCH}, indicating $switch$ is either $on$ or $off$. \math{switch = on} is an invariant that define a property of the variable $switch$, where switch can only take the value $on$. It has to be respected at {\em any} time throughout the software system, otherwise the invariant is violated, and the system will not be fully prooved.
+
+	\item {\bf Initialisation:} this part is compulsery for {\em every} variables declared. It makes possible variables to be given initial values. These, of course, must respect the invariant.
+
+	\item {\bf Operations:} as explained in the B-Book \cite[extras={, page 230, section 4.3}][BBook] \quotation{the role of an operation is to modify the state of an abstract machine, and this, of course, within the limits of the invariant.} These are known as functions in c, or procedure in Ada for instance.
+
+	An operation in B-method includes the concept of {\em precondition}. It aims to setup the conditions within which the operation should be used. These conditions must be checked {\em outside} the operation body. That is why there are called precondition.
+
+	Actually this concept is well known through the programming community, as you can use them in any language, not necessarily formalised. Indeed, in a language like Java for instance, a precondition can be used within the function comments, setting up conditions of use. It is the programmer responsibility in such a language to make sure, these conditions of use are respected {\em before} the function is called. But, nothing prevent him from doing it wrong, forgetting to check those conditions by mistake or anything else.
+
+	This is not the case in B-method, and more largely in formal methods. They make sure preconditions are checked within the code prior to the function calling. We will come to that in \in{subsection}[bm-implementation].
+	\stopitemize
+
+	These 5 concepts are respectively comprised within \type{SETS}, \type{VARIABLES}, \type{INVARIANT}, \type{INITIALISATION} and \type{OPERATIONS} clauses. These are the basic clauses that can be found within an abstract machine. However an abstract machine could contain, only the clause \type{SETS} for instance. It is useful when some basic sets are to be used throughout all the project. For instance, considering a door system it could be interesting to have machines to carry out operations, and a machine to introduce the set \type{STATE =  {opened,closed}} that might be used in different machines. The machine should be linked, somehow, using a link clause. We will come to that later on this report.
+
+	\subsubsection[am-example]{Example of an abstract machine}
+
+	Here is an example of an abstract machine. It contains all the basic clauses mentionned in the previous section. It is based on the door system previously mentionned in \in{subsection}[fm-znotation].
+
+	\loadBExample{DOOR}
+
+	\subsubsection[am-concept]{Important abstraction concepts}
+
+	Abstraction level requires to understand several aspects specific to that level. Here are presented the two most important, largely used within abstract machine.
+
+	\startitemize[1]
+	\item {\bf Indeterminism:} this concept is used within operations body. It allows a certain laxity in the specification, that is, leaving some piece of information to a lower level of abstraction like implementation for instance. A variable for example does not necessarily need to be explicitly affected to a particular value. There is just the need to make sure the substitution\footnote{A substitution defines an atomic operation by which a variable is given a new value, the symbol of substitution within B-method is \quote{$:=$}. The common form of a substitution is $Variable := Expression$} holds the invariant. So a form of indeterminism would be something like: {\em for a variable k, which is a number from 0 to 9, k is being affected the value either 0, 1, 2,..., or 9.} This is formally written with the symbol $:\in$, translated by \quote{becomes in}. So for the example above the substitution would be: $k :\in \{0,1,2,3,4,5,6,7,8,9\}$.
+
+ 	Notice that there is another form of indeterminism within B:
+ 	\startitemize[2,packed]
+ 		\item {\em CHOICE ... OR ... END:} it defines an indeterministic choice, that has to be clarified in a next level of abstraction, at most in the implementation. For instance \type{CHOICE} $aa := 2$ \type{OR} $aa := 1$ \type{END}, would become either $aa := 2$ or $aa := 1$ in an implementation or something like \type{IF} condition \type{THEN} $aa := 2$ \type{ELSE} $aa := 1$ \type{END}. This is useful when the condition on which the control will be made is to be decided at an implementation level.
+ 	\stopitemize
+
+	\item {\bf Parallel substitution:} this concept is a form of indeterminism but it addresses the problem of sequencing. Indeed sequencing, is prohibited within abstraction level. An abstract operation (operation defined within an abstract machine) does not specify in which order substitutions are made, so that the operation is the most abstract possible. Something like $aa := 2 ; bb := 3$ would be written $aa := 2 \parallel bb := 3$ where \quote{$\parallel$} is the parallelism symbol and \quote{;} the sequencing symbol. This can be turn into $aa := 2; bb := 3$ or $ bb := 3 ; aa := 2$ within an implementation. This implies some restrictions within the operation body. For instance writing something like $ aa := 2 || aa := 1 $ is forbidden! Indeed what will be the state of $aa$ at the end of the operation, 2 or 1? Because of parallelism variables are to be assigned values with mean of only one substitution, no matter how complicated it is.
+	\stopitemize
+
+	\subsection[bm-refinement]{Refinement}
+
+	Refinement is there to help going from an abstract specification, to a specification (also called implementation) that takes into account computer constraints (like sequencing). It is concerns with telling more information, like removing indetermism, although this is not compulsery. A refinement can handle both abstract and some implementation concepts. The refinement concepts are contained into a refinement machine, whose keyword is \type{REFINEMENT}. It must include which machine (abstract or refined\footnote{indeed it is possible to refine a refinement! Notice that you cannot refine an implementation.}) it refines by the keyword \type{REFINE}.
+
+	\subsubsection[bm-ref-what]{What does refinement do?}
+
+	\startitemize[1,packed]
+	\item {\bf Weaken operation precondition:} it is concerns with removing more and more parts of a precondition until makes it disappear. Indeed precondition is supposed to be called {\em before} calling an operation. Precondition will be tested (by the programmer, not the compiler whose role is to check the programmer will test it) within the calling operation.
+
+	\item {\bf Sequencing:} it starts being introduced, and is part of removing parallelism.
+	\item {\bf Concrete variables} start being introduced to refine abstract variables. These variables are linked with each other within the invariant (this is called the {\em link invariant}), usually using the equality symbol \quote{=}. Notice that this is not an easy task, especially when abstract types are basic sets, but we will come to that later.
+	\item {\bf Proof:} of course, the refinement is concerned with checking it does what the abstract machine does, otherwise refinement is useless!
+	\stopitemize
+
+	\subsubsection[bm-ref-concept]{Important refinement concepts}
+
+	These concepts are used within the refinement process, and are important to bear in mind when developing a B project.
+
+	\startitemize[1,packed]
+	\item {\bf Constant signature:} this means a refinement machine (including implementation) has to keep the same signature of operations than abstract machine throughout the whole process of refinement. This causes some problem of operation parameters. Indeed if a signature has to be the same from abstraction to implementation, of what type should be the parameters and the return type (if applicable)? Well, return variables have to be concrete at all times, {\em i.e.} even in an abstract machine, whereas operation parameters can be either abstract or concrete.
+	\item {\bf Automatic refinement:} the process of refinement is usually a repetitive task. Therefore, developers of B-method have build a tool that allow a programmer to automatically develop refinement machines, given a set of rules and an abstract machine.
+	\stopitemize
+
+	\subsection[bm-implementation]{Implementation}
+
+	Implementation is the final step of the refinement process. It refines either a machine or a refinement, but the implementation itself cannot be refined anymore. Notice that the language used within implementation machine is called B0.
+
+	\subsubsection[bm-imp-what]{What does implementation do?}
+
+	Here are presented, some concepts as well as what an implementation does.
+
+	\startitemize[1,packed]
+	\item {\bf No abstract variables:} implementation does not have state of its own, that is no abstract variables,
+	\item {\bf Importation:} it has to import other machines, using their operations to implement its own.
+	\item {\bf Control structure:} operations have to be implemented in such a way that the control structure are easily translatable in an imperative language,
+	\item {\bf Variables:} they are now strictly limited to the use of concrete types,
+	\item {\bf Indeterminism and parallelism} are now {\em definitely} suppressed,
+	\item {\bf Preconditions:} they are completely removed. However the code is prooved, only if the calling preconditions are respected, as seen in \in{subsubsection}[bm-ref-what].
+	\stopitemize
+
+	\subsubsection[bm-imp-example]{Example of an implementation}
+
+	This example is based on the previous abstract machine. It gives at the same time an example of refinement (since implementation is a refinement), that was not given in \in{section}[bm-refinement].
+
+	\loadBExample{DOOR-imp}
+
+	$encode\_state$ is a relation that links (encodes) a basic set to concrete variables. It is usually defined in another machine, imported (see \in{subsubsection}[bm-design-imports]) by the implementation, but in order to simplify it has not been included in this example. Just notice that $encode\_state \in STATE $\rightarrowtail\!\!\!\!\!\rightarrow$ \{0,1\}$, where $\rightarrowtail\!\!\!\!\!\rightarrow$ is a bijection.
+
+	\subsection{Code generation}
+
+	This is the last step of a B project. This is not done by the programmer, but automatically by the tool. An implementation machine is translated from the BO language to a target language. Currently, 4 languages are available: C, C++, Ada, and High Integrity Ada (HIA).
+
+	\subsubsection{What does code generation do?}
+
+	\startitemize[1,packed]
+	\item {\bf Unitary translation of an implementation:} it generates a compilable code from BO. Remember that an implementation machine was made with control structure, like \type{IF THEN ELSE}, or \type{WHILE}, thus a code is easily translatable. However, the target type of code can conflict with the B0 language. For instance B0 might impose some restriction regarding variables names, restriction that would not be the same in C or Ada. This situation can lead to conflicts.
+
+	This step is unitary because it translates each implementation machine one by one. Each of them will produce a single file, as well as a header file.
+
+	\item {\bf Project linking:} as each implementation machine is translated separately, a mechanism to link all the machines with each other is needed. This is what project linking does. It creates the references, \type{#include} for C and C++, and \type{uses} for Ada and HIA for instance, regarding composition clauses present in each machine (see \in{section}[bm-design]).
+	\stopitemize
+
+	\subsection{Summary}
+
+	We saw in this section the main aspects of each level of abstraction (code generation is not really a level of abstraction but it was useful to mention it), and how to go from on to another. However this only addresses the problem with one machine (one abstract machine, its refinement(s) and implementation). For significantly sized project a good linking mechanism between machine is needed. The next section addresses this subject, with the main different compisition clauses.
+
+	\section[bm-design]{Design an application with B}
+
+	The B method contains numerous characteristics of design, due to the use of different level of abstraction. The design will be sensibly different from a level to another. These differences and main composition clauses (that is how the link keywords are called) will be discussed in this section.
+
+	\subsection{Abstract design}
+
+	The B method embeds several composition clauses in order to organize the abstract specification. These clauses do not describe the structure of the final implementation, and therefore the structure of the final software. The composition clauses just help organising an abstract specification. Besides the use of these clauses will result in a specific refinement and implementation strategy.
+
+	\crlf
+
+	{\bf Note:} {\em First, on the figures of this section, semi-circles outside the machine rectangle represent an operation of that machine. Second, these figures give you a general idea behind each composition concept.}
+
+	\subsubsection{The {\em SEES} clause}
+
+	A SEES clause can be used in the definition of SETS or CONSTANTS (not VARIABLES because variables represent the state of a specific machine) that have to be available in the whole application. This is one way of using the SEES clause. There are obviously some more.
+
+	The \in{figure}[seesclause] shows the relationships of a machine M1 seeing a machine M2. A machine M1 that sees an other machine M2, has only read access to the variables through its own operations or through read only access operations of the machine M2. The machine M1 has access to the SETS and CONSTANTS of M2.
+
+	\placefigure[here][seesclause]
+		{Sees clause and its relationships \cite[extras={, figure 11.1}][BMETSCHNEIDER]}
+		{\externalfigure[sees.png][width=10cm]}
+
+	A machine comprises basic sets used throughout the whole project would be {\em seen} by every machine.
+
+	\subsubsection{The {\em INCLUDES} clause}
+
+	An INCLUDES clause provides {\em extension} relationships between two or more machines. A machine M1 including a machine M2 will extend the operations of machine M2. An operation of M1 can call an operation of M2 or an operation of M2 can be {\em promoted} so it becomes accessible through M1. However every operations of M1 must preserve its invariant (including possible promoted machines of M2). Of course every operations of M2 must preserve its own invariant as well.
+
+	If all operations are to be promoted, then we use the {\em EXTENDS} clause instead, because then M1 becomes an extension of M2, with a further invariant and operations of its own. This is comparable to inheritance relationship in Object Oriented Programming where some classes extand others.
+
+	\placefigure[here][includesclause]
+		{Includes clause and its relationships \cite[extras={, figure 10.1}][BMETSCHNEIDER]}
+		{\externalfigure[includes.png][width=13cm]}
+
+	\subsubsection[bm-design-imports]{The {\em IMPORTS} clause}
+
+	This clause is used for implementation machine, to allow them using \quote{services} of other machines. A machine must be imported only once, though several instance of that machine are allowed. For instance an implementation I1 imports a machine M2. I1 will refer to M2 by adding a suffix: import1.M2 and import2.M2 for instance. The state of the machine identified by {\em import1} is different from import2. Every implementation machine will have IMPORTS, even to refer to basic libraries. The difference is the same in Object Oriented Programming with classes and instances of classes.
+
+	\section[bm-basic]{Basic libraries/machines}
+
+	AtelierB provides some basic libraries to interact within the implementation level with the system. It provides for instance basic operations such as input or output of text. Such a machine is developed in a particular way. It has abstract specification in order to protect prohibited operations to be called within the implementation code (of another machine using this library), but has no implementation code itself. The code generation will produce operations headers without anything within their body. A developer can then fill the operations body with appropriate code, {\em i.e.} C++, C, Ada or High Integrity Ada.
+
+	AtelierB provides code for:
+	\startitemize[1,packed]
+	\item \type{BASIC_IO}: this library handles input of text and output of text,
+	\item \type{BASIC_ARRAY_VAR}: this library handles use of a one dimension array,
+	\item \type{BASIC_ARRAY_RGE}: this library handles use of a two dimensions array.
+	\stopitemize
+
+	There are only few available libraries due to a very specific need(and thus very specific specification), different for every project. This means that this project might (actually, quite sure) need specific libraries to be developed with the method just described. The most common basic machines that will be used and developed are machine implementing basic sets. Here is an example of a machine and its implementation implementing the \type{TRANS_AXIS} set:
+
+	\loadB{BASIC-TRANS-AXIS}
+
+	\loadB{BASIC-TRANS-AXIS-imp}
+
+	Here each element of the set is given an implementation value: an integer. The encoding is hided from user, who just uses the operation \type{encode}, in order to encode a given axis.
+
+	\section[bm-check-proof]{Code checking \& proof}
+
+	\subsection[bm-tc]{Type checking}
+
+	This step is concerned with checking numerous things, mostly concerned with types of variables. Here is a non-exhaustive list of things type checking does:
+
+	\startitemize[1,packed]
+	\item Verify that the data has been correctly typed and that expressions used within predicates and substitution are of compatible types,
+	\item Check visibility rules: make sure access of data are allowed, depending if a machine has a write/read-only acccess to the data of another machine,
+	\item Make sure there is no ambiguity within the data.
+	\stopitemize
+
+	These are the 3 main things type checking does. It precedes the generation of proof obligations. Indeed it wouldn't make sense to generate proof obligations with mistyped code.
+
+	\subsection[bm-po]{Proof obligations}
+
+	\indenting[no]
+	Here is the definition of proof obligations gave by the author of the B-method\footnote{It is known in High Integrity Ada as verification condition.}:
+
+	\startnarrower
+		\quotation{A proof obligation is a mathematical formula to be proven, in order to ensure that a B component is correct.}\cite[BPOManual]
+	\stopnarrower
+
+	A proof obligations (also shortened with PO) is of the form, $H \Rightarrow P$, where $H$ and $P$ are predicate. This means $P$ has to be proven under the hypotheses $H$. Notice that $H$ is usually a concatenation of several predicate.
+
+	Let's illustrate that with an example. Here is the machine \type{example} (from \cite[BPOManual]):
+
+	\loadBExample{EXAMPLE}
+
+	Notice that a proof obligation is generated if there are operations, since they are modifying the state of the machine. The proof obligation generated for this machine is: $val \in \naturalnumbers \Rightarrow val + 1 \in \naturalnumbers$. If it can be proved then this machine is labelled as \quote{correct}.
+
+	\indenting[yes]
+
+	\chapter[safer-bmethod]{Develop the SAFER sytem using B-Method}
+
+	\section{Introduction}
+
+	As previously seen, the B-Method allows a system to be specified {\em and} implemented, thanks to the process of refinement. SAFER has been specified using PVS, which only allows formalisation of specification, as well as verification (see \in{subsection}[fm-pvs]). It is interesting to see how the B-Method can be used in this particular case that is SAFER.
+
+	Therefore this chapter will address the project itself, {\em i.e.} the development of the SAFER system using B-Method. Due to some problems in trying to use both B-method and tools associated, the initial version of the system was not developed. However the system produced resembles the original idea of the {\em Streamlined SAFER}, that is:
+
+	\startnarrower
+	\startquotation
+	The idea of the streamlined SAFER was to developed a correct code using B-method, in order to have a quick overview on the method, for a development process from specification with abstract machine, to code generation. This version of the SAFER includes only function to move forward and backward, and to switch on/off the HCM. Thus this SAFER has only one axis X, and 4 front, 4 back thrusters, as well as a switch on/off button. In order to simplify the development, the code is build around only one machine AVIONICS, that implements the functionalities described above. Indeed, the functionalities developed here were too simple to bother developing 4 machines (HCM\_INPUT, COMMAND\_INTERPRETER, THRUSTER\_SELECTION\_LOGIC, THRUSTER\_OUTPUT). Besides the use of the different clauses to organize the specification is not obvious for who is not used to the B-method. The machine AVIONICS is of course implemented. This implementation uses numerous other machines in order to implement enumerated sets (such as those found in the machine SAFER\_TYPE), one dimension array, etc.
+	\stopquotation
+	\stopnarrower
+
+	The version produced will be presented in the next sections, as well as how it differs both from the Streamlined SAFER and the original one.
+
+	\section{SAFER system}
+
+	The \in{figure}[archi], 4 modules are clearly visible within the avionics software. The system produced only look at the {\em command interpreter} and the {\em thruster selection logic}. Modules highlighted in gray, are not explicitly present in the project as there are no hardware system to communicate with. For instance the {\em thruster command output} is replaced by a message giving which of the 24 thrusters are fired. From the Streamlined SAFER point of view, the system produced implements the same modules. However it tends to maximise the use of composition clauses such as \type{INCLUDES} or \type{IMPORTS}.
+
+	\crlf
+
+	A B-method system is composed of abstract, refinement and implementation machines. Abstract machines aim to specify the system, and code is generated from implementation machines. Given the previous described modules of SAFER system, the task was to choose appropriate organisation and imbrication of machines. This is not an easy task, as a formal method like B-method doesn't follow a \quote{classical} type of organization due to the refinement process. A good idea is to be inspired by the modules given in the flowchart of the avionics software. Each module will be represented as an abstract machine. The problem is to decide at which level of abstraction a machine will use another one. For instance, let's assume we have three machines \type{AVIONICS}, \type{COMMAND_INTERPRETER} and \type{THRUSTER_SELECTION_LOGIC}. There are roughly two types of organisation. They are presented in \in{figure}[level].
+
+	\placefigure[here][level]
+	{Types of organisation}
+	{\startcombination[2*1]
+	{\externalfigure[abstract-level.png][width=8cm]} {a: at abstract level} {\externalfigure[implementation-level.png][width=8cm]} {b: at implementation level}
+	\stopcombination}
+
+	Organisation at implementation level seems more complicated as there are more machines. However the \type{AVIONICS} implementation machine will probably tend to be quite complex in organisation {\em (a)}. Therefore I chose to use the second one. This will lead to a significant amount of machines, but the code will probably find itself much more readable. Just like in object programming, a code is much more enjoyable when split into relevant and numerous classes rather than all in a main class.
+
+	\subsection{SAFER architecture}
+
+	Given the SAFER architecture in \in{section}[safer], a design peculiar to the B-method was achieved (see \in{figure}[design]). Several important things can be noticed on this figure:
+	\startitemize[1,packed,intro]
+	\item as shown in this figure, it is quite complicated. It just shows how machines are related to each other.
+	\item the more \quote{basic} the machines are, the more used. Indeed a basic machine implements a basic set, used throughout the whole project, therefore they are used a lot.
+	\item the schema clearly shows that the \type{MAIN} machine uses two modules: \type{COMMAND_INTERPRETER} and \type{THRUSTER_SELECTION}. We will see these two machines in details later on, as well as the other machines, in order to explain what they implement.
+	\stopitemize
+
+	\placefigure[force][design]
+		{Simplified schema of the software design (see \in{appendix}[a-design] for the complete design with implementation machines.)}
+		{\externalfigure[design-simple.png][height=22cm]}
+
+	\subsection{Previous planned design}
+
+	Originally, it was planned to develop the machines presented below. The requirements mentionned here refer to the requirements present in \in{appendix}[requirement]
+
+	\startitemize[1,packed]
+	\item \type{SAFER_TYPE}: contains all types that will be used througout the software development such as the type of thrusters, the type of inputs and so on. All the machines described below see this machine.
+
+	\item \type{HCM_INPUT}: is concerned with providing an interface between the machine \type{COMMAND_}\type{INTERPRETER} and the switches of the HCM.\crlf
+	{\bf Specification:} as stated in \in{appendix}[requirement], requirement 11. That is, the avionics software shall accept the following data from the hand controller module.
+
+	\item \type{COMMAND_INTERPRETER}: aims to translate commands received from the \type{HCM_INPUT} into appropriate output.\crlf
+	{\bf Specification:} as stated in \in{appendix}[requirement], requirements 7 and 8.
+
+	\item \type{IRU_INPUT}: is concerned with providing an interface between the machine \type{STATE_ESTIMATOR} and the IRU system that senses rates and temperatures of thrusters.\crlf
+	{\bf Specification:} as stated in \in{appendix}[requirement], requirement 16.
+
+	\item \type{STATE_ESTIMATOR}: aims to interpret the temperatures and rates values provided by the \type{IRU_INPUT}.
+	{\bf Specification:} as stated in \in{appendix}[requirement], requirement 12.
+
+	\item \type{AAH}: specifies the Automatic Attitude Hold. \crlf
+	{\bf Specification:} as stated in \in{appendix}[requirement], requirements 3,4,5 and 6.
+
+	\item \type{THRUSTER_SELECTION}: this machine aims to provide which thruster must be switched off or switched on, regarding the thruster selection table provided in the previous document (table 2.1 and 2.2).\crlf
+	{\bf Specification:} as stated in  \in{appendix}[requirement], requirements 9 and 10.
+
+	\item \type{THRUSTER_OUPUT}: aims to provide an interface between the \type{THRUSTER_SELECTION} machine and the thruster system.\crlf
+	{\bf Specification:} as stated in  \in{appendix}[requirement], requirement 14.
+	\stopitemize
+
+	For numerous reasons, this design, and therefore these machines were not all implemented. The two main we are interested in are \type{THRUSTER_SELECTION} and \type{COMMAND_INTERPRETER}. Besides all requirements haven't been all implemented in these machines. This is mainly due to problems encountered with AtelierB (see \in{section}[atelierb]) and mastering the B method.
+
+	\section{Description of machines}
+
+	This section will address important modules of the SAFER system that have been developed. It will not detailed all machines present in \in{figure}[design].
+
+	{\em {\bf Note:} It is important to often look at \in{figure}[design] in order to get a good overview of the relationships between machines, like importation for instance.}
+
+	\subsection{SAFER TYPE}
+
+	The \type{SAFER_TYPE} machine includes types, {\em i.e.} basic sets that will be used throughout the whole project. The sets are presented below, they are defined in extension, like every basic sets.
+
+	The sets below represent information related to axis. \type{TRANS_AXIS}\footnote{The axis are represented with double letters $xx$ for the X axis, $yy$ for Y axis and so on. This is just a restriction of the B syntax that forbids the use of single letter as identifier, variables, or even elements of basic sets.} for information related to transational axis, and \type{ROT_AXIS} for rotational axis. \type{AXIS_VALUE} defines values of each axis as defined in \in{subsection}[safer-software], that is positive, negative or no thrust at all. It will be useful to construct relations involving \type{TRANS_AXIS} and/or \type{ROT_AXIS} to formalize a specification, we will see how it is done later on.
+	\startitemize[1,packed,intro]
+	\item {\bf \type{AXIS_VALUE}} = $\{zero,neg,pos\}$
+	\item {\bf \type{TRANS_AXIS}} = $\{xx,yy,zz\}$
+	\item {\bf \type{ROT_AXIS}} = $\{roll,pitch,yaw\}$
+	\stopitemize
+
+	\noindent These two sets represent switches, therefore only two values define them.
+	\startitemize[1,packed,intro]
+	\item {\bf \type{POWER_SWITCH}} = $\{on,off\}$
+	\item {\bf \type{MODE_SWITCH}} = $\{tran,rot\}$
+	\stopitemize
+
+	Here are represented sets related to thrusters: first the set defining all thrusters by their name (see \in{figure}[thrustername]), and second the set that defines whether a thruster is fired or not. Notice that we could have use the set \type{POWER_SWITCH} to implement that. However, despite the fact their carry the same information, they are not used within the same context. It is important to differentiate those two, in order to avoid confusion or even mistakes within the specification. This is usually a good policy. Moreover a warning is to be given on big sets, like \type{THRUSTERS}, it can increase considerably the time of prooving, depending on the relation it is involved into.
+	\startitemize[1,packed]
+	\item {\bf \type{THRUSTERS}} = $\{$ \crlf
+	    		\type{b1,b2,b3,b4,} \crlf
+	    		\type{f1,f2,f3,f4,} \crlf
+	    		\type{l1r,l1f,r2r,r2f,} \crlf
+	    		\type{l3r,l3f,r4r,r4f,} \crlf
+	    		\type{d1r,d1f,d2r,d2f,} \crlf
+	    		\type{u3r,u3f,u4r,u4f} \crlf
+	    		$\}$
+	\item {\bf \type{THRUSTERS_SWITCH}} = $\{$\type{fired,notfired}$\}$
+	\stopitemize
+
+	From now on every machine \quote{sees} \type{SAFER_TYPE} and therefore has read access to these sets.
+
+	\subsection{COMMAND INTERPRETER}
+
+	{\em This section will present the abstract machine, and its implementation, for the complete code see \in{appendix}[code-cmdint] and \in{appendix}[code-cmdint-imp].}
+
+
+	As stated in the requirements the command interpreter machine shall respond properly to input given by the \type{HCM_INPUT} machine\footnote{\type{HCM_INPUT} is not implemented here as it is a really simple machine, and because there is no proper input like they would be on an actual SAFER, the input are made within the main function.}. The machine includes several operations allowing to control the SAFER system, like \type{switch_on}, \type{switch_off}, etc.
+
+	\subsubsection{Abstract machine}
+	\indenting[no]
+		\startitemize[2]
+		\item {\bf Variables:} this machine includes 4 variables representing different states of the machine: \type{power_switch}, \type{mode_switch}, \type{translation}, \type{rotation}. The two latter represent value of each axis. They are typed as follow:
+			\startitemize[3,packed,intro]
+			\item \type{power_switch} $\in$ \type{POWER_SWITCH}
+			\item \type{mode_switch} $\in$ \type{MODE_SWITCH}
+			\item \type{translation} $\in$ \type{TRANS_AXIS} $\longrightarrow$ \type{AXIS_VALUE}
+			\item \type{rotation} $\in$ \type{ROT_AXIS} $\longrightarrow$ \type{AXIS_VALUE}
+			\stopitemize \crlf
+
+		\type{translation} $\in$ \type{TRANS_AXIS} $\longrightarrow$ \type{AXIS_VALUE} is a total function from \{\type{xx,yy,zz}\} to \{\type{zero,pos,neg}\}. That means each axis is assigned a single value at every instance of time. The relation \type{rotation} works in a similar way.
+
+		Six variables could have been used for the two latter variables: \type{translation_xx}, \type{translation_yy}, \type{translation_zz} and \type{rotation_xx}, \type{rotation_yy}, \type{rotation_zz}. Each of these variable would have been of the type \type{AXIS_VALUE}. However it has not been used because it is less powerful in terms of specification. It is much easier to manipulate a relation than 3 differents variables. Indeed much more constraints can be expressed, like cardinality for instance.
+
+		\item {\bf Invariant:} variables types were addressed above  The next part of the invariant is concerned with formalizing a specification:
+			\startitemize[3,packed,intro]
+			\item If the power is switched off, then all commands have to be set to zero:\crlf
+				\startnarrower
+\tt (power\_switch = off $\Rightarrow$ ran(translation) = \{zero\} $\wedge$ ran(rotation) = \{zero\}) \ss
+				\stopnarrower
+				This means that if \type{power_switch} is off, it implies that all translation and rotation are equal to zero.
+			\item \ss If a rotational command is not null, then all translation commands have to be suppress 	\startnarrower
+\tt $\forall$ aa $\in$ ROT\_AXIS $\Rightarrow$ (ran(\{aa\} $\triangleleft$ rotation) \neq \{zero\} $\Rightarrow$ ran(translation) = \{zero\})) \ss
+				\stopnarrower
+			 For every rotational axis, if one does input a negative or positive thrust then all translation axis have to be equal to zero.
+
+			\item At most one translation command shall be on, with priority given in this order X, Y and Z: \crlf
+			\startnarrower
+			\tt(card(ran(translation $\triangleright$ \{pos,neg\})) <= 1) \ss
+			\stopnarrower
+
+			It is interesting to notice that not everything can be expressed in this abstract machine. This is the case of the priority requirement here. It is at a low level that it would be expressed, such as in implementation (not necessarily the implementation of that machine, but for instance in the implementation of an importing machine). A possible solution would be to use an \type{IF THEN ELSE} structure in the order given above.
+			\stopitemize
+
+			\crlf
+
+			Constraints related to this particular machine were written in the invariant clause, it now has to be respected by the following operations
+
+		\item {\bf Operations:}
+			\startitemize[3,packed,intro]
+			\item \type{is_powered_off}: check whether the SAFER is switched off or not,
+			\item \type{is_mode_tran}: check whether the SAFER is in translation mode or not,
+			\item \type{switch_off}: switch off the SAFER if it is not already off,
+			\item \type{switch_on}: switch on the SAFER if it is not already on,
+			\item \type{switch_mode_tran}: switch to translation mode,
+			\item \type{switch_mode_rot}: switch to rotational mode,
+			\item \type{translate_on_xx(value)}: input a thrust zero, positive or negative for the X axis,
+			\item \type{translate_on_yy(value)}: input a thrust zero, positive or negative for the Y axis,
+			\item \type{translate_on_zz(value)}: input a thrust zero, positive or negative for the Z axis.
+			\stopitemize
+			\crlf
+		\indenting[yes]
+			These operations hide how they are implemented. The action of switching on the SAFER will be hided from the calling operation, and so will it be for the switching off operations, and the other ones.
+
+			Moreover the two former operations \type{is_powered_off} and \type{is_mode_tran} aim to be used to check the preconditions of some operations. For instance the SAFER cannot be switched on if it is already on, and cannot be switched off if it is already off. These are the preconditions of use of these two operations. It is usually a good policy two prohibit things that would not be allowed within a given context, the use of the SAFER hand maneuvering control for instance.
+		\stopitemize
+
+	\subsubsection{Refinement machine}
+
+	The refinement machine here is quite straight forward and will not be detailed here. It just introduces sequencing in replacement of parallelism.
+
+	\subsubsection{Implementation machine}
+
+	\indenting[no]
+
+	Here we will focus on how the above specification has been implemented. As seen in \in{chapter}[bmethod]:
+		\startitemize[2,packed,intro]
+		\item an implementation machine uses \quote{services} of other machines in order to implement its own operations
+		\item an implementation machine has no state of its own.
+		\stopitemize
+	Therefore in order to implement the various state holded by the four variables \type{power_switch}, \type{mode_switch}, \type{translation} and \type{rotation}, a number of basic machines have been developed. There are:
+		\startitemize[2,intro]
+		\item \type{BASIC_POWER_SWITCH} and \type{BASIC_MODE_SWITCH}: they do more than just implementing basic sets into implementable values (as see in \in{section}[bm-basic]), they hold the state of the machine as well. That means for instance that the value of \type{power_switch} is contained into the machine \type{BASIC_POWER_SWITCH} and not within the implementation. That is why the operation \type{switch_on}, for example, of the implementation machine, calls operation \type{switch_on} from \type{BASIC_POWER_SWITCH} whereas it was modifying its own state in the abstract machine.
+
+		Let's clarify this! Here is the operation \type{switch_on} as it is in the abstract machine:
+		\startpacked
+		\startnarrower
+		\type{switch_on} =
+    		\color[Bkeyword]{PRE}
+    	    	\type{power_switch} $\neq$ \type{on}
+    		\color[Bkeyword]{THEN}
+    	    	\type{power_switch} := \type{on}
+    		\color[Bkeyword]{END}
+		\stopnarrower
+		\stoppacked
+
+		and here is the implemented operation:
+
+		\startpacked
+		\startnarrower
+		\type{switch_on} =
+    		\color[Bkeyword]{THEN}
+    	    	\type{power.switch_on}
+    		\color[Bkeyword]{END}
+		\stopnarrower
+		\stoppacked
+
+		\type{power} refers to the imported machine, declared as follows:
+		\startnarrower
+		\color[Bkeyword]{IMPORTS} \type{power.BASIC_POWER_SWITCH}.
+		\stopnarrower
+
+		The implementation using \type{BASIC_MODE_SWITCH} will not be detailed here. Just notice the variable \type{mode_switch} is implemented in the same way as \type{power_switch} and so are operations related to it.
+
+		\item \type{BASIC_TRANSLATION} and \type{BASIC_ROTATION} implement relation respectively from \type{TRANS_AXIS} and \type{ROT_AXIS} towards \type{AXIS_VALUE}. Only the first relation will be addressed, as they both work the same way (for the complete code of both machines see \in{appendix}[code]).
+
+		\type{BASIC_TRANSLATION} is just a simple machine implementing the following relation:
+		\type{TRANS_AXIS}~$\longrightarrow$~\type{AXIS_VALUE}. The two basic sets involved are used as they are, it is in the implementation of \type{BASIC_TRANSLATION} that they would be \quote{encoded} using \type{BASIC_TRANS_AXIS} and \type{BASIC_AXIS_VALUE}.
+
+		Now that we find a way to implement the two basic sets we need, a mechanism to implement a total function has to be found. This is where the basic libraries provided by the software AtelierB will be used. The one that we are interested in is \type{BASIC_ARRAY_VAR}, it implements a total function with use of an array, indeed it is the perfect structure for that type of relation. The structure will of course depends on the type of relation. The more complicated the relation the harder to implement. For instance a partial function could not be easily implemented.
+		\stopitemize
+	\indenting[yes]
+
+	\subsection{THRUSTER SELECTION}
+
+	{\em This section will present the abstract machine, and its implementation, for the complete code see \in{appendix}[code-thrsel] and \in{appendix}[code-thrsel-imp]. We will not address refinement step as there is not any in this module.}
+
+	This machine is concerned with dealing with input from the \type{COMMAND_INTERPRETER} machine. It has to rely on the thruster selection logic (see \in{table}[selectionlogicxpy] \& \in{table}[selectionlogicyzr]) to fire proper thrusters (limited to four at any time).
+
+	It is quite hard to find a structure to express these two tables. A solution would be to go straight to implementation and make it easier to specify, however the abstraction would loose a bit of its appeal. Another solution would be to use several relations overlapped with each other. Indeed for the selection logic, there are a source set, which is the combination of all possible input, and a target set which will be a combination of 4 thrusters. So the relation would be:
+
+	\startnarrower
+	\quotation{\em Combination of input} $\longrightarrow$ \quotation{\em Combination of 4 thrusters}
+	\stopnarrower
+
+	\noindent Let's detail both sets:
+
+	\startitemize[2,info]
+	\item The combination of possible inputs is a component of 4 variables as seen in \in{chapter}[safer]. There are 3 sets of variables: \{X,Pitch,Yaw,Roll\}, \{Y,Pitch,Yaw,Roll\} and \{Z,Pitch,Yaw,Roll\}. The set of all possible inputs will depend on the thrust of each variable: positive, negative or no thrust. Thus the size of possible inputs for a set of variables is 81, and 243 for the whole range of inputs. The set would then be:
+	\crlf
+	\startnarrower
+	(\type{TRANS_AXIS} $\longrightarrow$ \type{AXIS_VALUE}) $\times$ ({pitch} $\longrightarrow$ \type{AXIS_VALUE}) $\times$ ({yaw} $\longrightarrow$ \type{AXIS_VALUE}) $\times$ ({roll} $\longrightarrow$ \type{AXIS_VALUE})
+	\stopnarrower
+	\crlf
+	This is a {\em huge} set and it would be hard to verify that it respects the invariant, indeed the proover provided in the software might not be that powerful to deal with so many cases.
+
+	\item The combination of thrusters could be the powerset of \type{THRUSTERS}. However each set has to be limited to 4 elements, and powerset does not provide such a guarantee. Besides it would include combination of thrusters that are not used anyway and would be a waste of time during the proof step. A solution is to explicitly define the set of possible combination of thrusters amongst which has to be the empty set meaning that no thrusters should be fired.
+	\stopitemize
+
+	The set of elements from the relation being far too much big, leading to time of prooving considerably long, hours or maybe even days, it has been decided to implement only a part of the selection logic table. That is to only consider input on one axis at a time. For instance what thrusters should be fired if only X axis has an input from the \type{COMMAND INTERPRETER}? The selection logic considered is shown on \in{table}[slnewtable].
+
+	\startbuffer[slnewtable]
+	\starttable[|c|c|]
+		\HL
+		\VL X \VL Thrusters to fire \VL\AR
+		\HL
+		\VL - \VL B1,B2,B3,B4 \VL\AR
+		\VL + \VL F1,F2,F3,F4 \VL\AR
+		\VL $\varnothing$  \VL             \VL\AR
+		\HL
+		\NC   \NC                   \NC\AR
+		\HL
+		\VL Y \VL Thrusters to fire \VL\AR
+		\HL
+		\VL - \VL L1R,L3R,L1F,L3F \VL\AR
+		\VL + \VL R2R,R4R,R2F,R4F \VL\AR
+		\VL $\varnothing$  \VL             \VL\AR
+		\HL
+		\NC   \NC                   \NC\AR
+		\HL
+		\VL Z \VL Thrusters to fire \VL\AR
+		\HL
+		\VL - \VL U3R,U4R,U3F,U4F \VL\AR
+		\VL + \VL D2R,D1R,D1F,D2F \VL\AR
+		\VL $\varnothing$  \VL             \VL\AR
+		\HL
+	\stoptable
+	\stopbuffer
+
+	\placetable[here][slnewtable]
+		{Selection logic table implemented}
+		{\externalfigure[slnewtable.tmp][height=6cm,width=4cm]}
+
+	\subsubsection{Abstract Machine}
+
+	Given what was said above, an abstract structure was \quote{implemented}. The variables \type{tsl_axis_xx}, \type{tsl_axis_yy} and \type{tsl_axis_zz} express that table with the mean of a total function.
+
+	Now we need a structure to record the state of each thrusters (fired or not fired) just as it is in \type{COMMAND INTERPRETER} with \type{TRANS_AXIS} and \type{AXIS_VALUE} for instance. So we use the same relation, a total function, \type{thrusters_state_map} $\in$ \type{THRUSTERS}~$\longrightarrow$~\type{THRUSTERS_SWITCH}, on which we can apply the constraint \quotation{no more than 4 thrusters fired at any time}.
+
+	\startnarrower
+		\tt card(dom(thrusters\_state\_map $\triangleright$ \{fired\})) $≤$ 4 \ss
+	\stopnarrower
+
+	Here expressing the specification in an abstract way was not easy, and some concession had to be made. Now we will see how the implementation of that machine was made.
+
+	\subsubsection{Implementation}
+
+	The structure to be used in the implementation machine was as well part of the decision to simplify the abstract structure of thruster selection logic. Indeed some basic libraries (usually provided with AtelierB) where not included in the software, which limited the use of libraries to \type{BASIC_ARRAY_VAR}, \type{BASIC_ARRAY_RGE} and \type{BASIC_IO}. It is too few to implement a correct system, although sufficient for this version of the SAFER.
+
+	In order to implement the relation given by variables \type{tsl_axis_xx}, \type{tsl_axis_yy} and \type{tsl_axis_zz} a basic machine \type{BASIC_TSL} was developed, \type{TSL} stands for thruster selection logic. It uses \type{BASIC_ARRAY_RGE} in the implementation. The link invariant of \type{BASIC-TSL} is quite complicated and will not be addressed here (it can be found in \in{appendix}[BASIC-TSL-imp]).
+
+	Normally \type{THRUSTER_SELECTION} is supposed to pass information to \type{THRUSTER_OUTPUT}. As no actual SAFER is available, the output which was meant to be thrusters firing will just be message displaying in the terminal.
+
+	\subsection[avionics]{AVIONICS}
+
+	Now that the two most important machines have been addressed, it is necessary to see how their are effectively used within a calling machine. This is what the \type{AVIONICS} machine does. First of all you would notice that the code of the abstract machine is very short. Indeed \type{AVIONICS} is a mean to call operations from \type{THRUSTER_SELECTION} and \type{COMMAND_INTERPRETER}, this can be done only in an implementation. As can be seen on the code of the implementation machine there are a lot of control structure. Operations calling imported operations make sure the preconditions are respected before any usage. This is all there is to say about \type{AVIONICS}, it controls the good usage of services provided by \type{THRUSTER_SELECTION} and \type{COMMAND_ INTERPRETER}.
+
+	An important point to notice is that the call of an operation \type{translate_on_AXIS}, changing the state of the machine \type{COMMAND_INTERPRETER} is not linked to the operation \type{fire_thrusters_AXIS}, changing state of machine \type{THRUSTER_SELECTION}. Both machines refer to 2 different states whereas they should share the same. For instance the machine \type{COMMAND_INTERPRETER} modifies the state of the variable \type{translation}. This variable is bounded by an invariant so its consistency regarding the specification can be check throughout the whole project. A good thing to do would be to make \type{THRUSTER_SELECTION} use this variable to decide which thrusters to fire regarding its thruster selection table, so that to make sure the invariant holds. However due to a problem related to the structure chosed at the beginning of the project, it was not possible to achieve that implementation. Indeed an imported machine has no read or write access to another imported machine, so \type{THRUSTER_SELECTION} cannot access state of \type{COMMAND_INTERPRETER}. The design chosed was probably not the right one.
+
+	\section{Proofs correctness}
+
+	Components of the project have successfully been type-checked. Proofs have been carried out, however proofs correctness was not the main requirements of the project and all components could not be fully proved, nonetheless the project remains 96\% prooved.
+
+	Moreover in order to allow flexibility, it is possible to generated code without fully prooved code. This is the case here for some machines. I guess some proof are mostly a matter of search tree being too big, probably due to the use of the \type{THRUSTER} set. The summary over each component status (Name, {\bf TC} type-checking, {\bf POG} Proof obligations generation, {\bf nPO} number of proof obligations, {\bf nUN} number of unproved obligations, {\bf \%Pr} percentage of prooved obligations, {\bf B0c} B0 check\footnote{B0 check is different from type checking, that's why a machine has to be both type-checked and B0 type checked.}) is presented in \in{figure}[proofreport].
+
+	\placefigure[here][proofreport]
+		{Proof status of SAFER project}
+		{\externalfigure[proof.png]}
+
+	\section[atelierb]{B-Method tool: AtelierB}
+
+	In order to develop a working SAFER system. A software able to handle B language, type-checking, obligation proofs generation\footnote{also called verification conditions}, automatic and interactive proof, as well as code generation was used. AtelierB, the tool developed by ClearSy, includes these features. However the free version of this software was in beta development at the time I used it\footnote{which is not the case anymore at the time I am writing these lines}. This led to some installation and usage problems, and considerabley slowed the development process down.
+
+	\section{Conclusions \& reflections}
+
+	It is a nature of a research based project to not necessarily go well all the time. On reflection I probably relied too much on the AtelierB software, which was not really in an usable version\footnote{This is still the case with the new release}. Missing libraries, steady crashes did not help to perform a significant and satisfactory piece of work.
+
+	The second reflection would be related with the B design sustained. It probably would have been more relevant to use the abstract level design using \type{INCLUDES} clauses for the reason explained in \in{section}[avionics]. \type{INCLUDES} clause allow two machines included to have access to each other state.
+
+	Despite these mistakes the project carried out works fine, but could and should be improved.
+
+	\chapter{Comparative works}
+
+	Several teams have worked on the SAFER project, and several different method have been used. No access to these studies were given, just their succint respective report allow to draw some conclusions here. The two method are PVS~\cite[SAFERPVS] (see \in{section}[fm-pvs]) and VDM~\cite[SAFERVDM]) see \in{section}[fm-vdm]).
+
+	Notice that only the requirements considered both in the development using these methods and the development presented in this report will be addressed.
+
+	\section{PVS and the SAFER study case}
+
+	The team who worked on this specification of the SAFER system developed a rather complete system, including AAH controller and in particular a complete thruster selection logic. This section will quickly present, step by step how the PVS model was built compare to this B version of SAFER.
+
+	\subsection{Typing}
+
+	Several types are used in order to specify the SAFER system. They are similar to the ones used in \type{SAFER_TYPE}, nonetheless different. Indeed PVS does not use set theory to formalize a specification, but uses a set of predefined relations. They will be presented as the description of types goes.
+
+	\startitemize[1,packed]
+	\item \type{axis_command: TYPE = {NEG,ZERO,POS}}
+	\item \type{tran_axis: TYPE = {X,Y,Z}}
+	\item \type{rot_axis: TYPE = {roll,pitch,yaw}}
+	\item \type{power_switch: TYPE = {OFF, ON}}
+	\item \type{control_mode_switch: TYPE = {ROT, TRAN}}
+	\stopitemize
+
+	PVS uses the keyword \type{TYPE} to describe any type: real, integers, enumeration and relations. Above, enumerations are described, in a same way sets are. Just below are presented the relation that defines the value of each axis. Notice that these relation were defined in the INVARIANT within B. The definitions are total functions more commonly called arrays.
+
+	\startitemize[1,packed]
+	\item \type{tran_command: TYPE = [tran_axis -> axis_command}
+	\item \type{tran_axis: TYPE = [rot_axis -> axis_command]}
+	\stopitemize
+
+	Developer of SAFER system have used several other definitions to be used within the avionics software:
+
+	\startitemize[1,packed]
+	\item \type{six_dof_command: TYPE = [# tran: tran_command, rot: rot_command #]}\footnote{\type{six_dof} refers to 6 Degree Of Freedom.}
+	\item \type{null_tran_command: tran_command = (LAMBDA (a: tran_axis): ZERO)}
+	\item \type{null_rot_command: rot_command = (LAMBDA (a: rot_axis): ZERO)}
+	\item \type{null_six_dof: six_dof_command = (# tran := null_tran_command,rot := null_rot_command #)}
+	\stopitemize
+
+	\type{[#}~$\ldots$~\type{#]} is a record type, and \type{LAMBDA}~($\ldots$) is a lambda expression. These definitions could be considered as aliases in order to simplify variable typing later on.
+
+	Here were presented the important types that will be used within the PVS development of SAFER. Comparing to B, PVS provides much less typing possibilities, and it is not as flexible as using set theory. For instance only the total function relation can be express here. Besides the fact PVS does not use abstract specification has to be kept in mind to understand how typing works here. Types are much closer to an implementation (array,records, ...) than an abstraction level.
+
+	\subsection{Implementation}
+
+	The developers of this PVS version of SAFER decided to implement a loop to control the state of the SAFER system very frequently. This loop is named the main control cycle, and is called every {\em n} milliseconds. It calculates the thruster settings according to the input from hand controller module. This control cycle call several functions which express invariant by a mean of control structure such as \type{IF THEN ELSE} or \type{CASE}. This is really close to the implementation level despite the fact they are structures that helps building the specification.
+
+	\crlf
+
+	The thruster selection logic is the main difference with this project that used B-method. Indeed PVS provides a perfect mean for such a structure. Considering the example below where the structure describes the definition sign function:
+
+	\startpacked
+	\startnarrower
+	\starttyping
+	sign(x): signs = TABLE  %------------------------%
+				|[ x < 0 | x = 0 | x > 0]|
+				%------------------------%
+				|   -1   |   0   |   1   |
+				%------------------------%
+			ENDTABLE
+	\stoptyping
+	\stopnarrower
+	\stoppacked
+
+	This provides a pretty straight forward structure for the selection logic table. For instance for the combination {X$\mapsto$NEG,Pitch$\mapsto$ZERO,Yaw$\mapsto$ZERO} that outputs thrusters B1,B2,B3 and B4 is:
+
+	\startpacked
+	\startnarrower
+	\starttyping
+	BF_thrusters((A, B, C:axis_command)): thruster_list_pair =
+		TABLE A
+			| NEG | TABLE B
+				| ZERO | TABLE C
+					%-------------------%
+					| NEG | B1,B2,B3,B4 |
+					%-------------------%
+				ENDTABLE
+			ENDTABLE
+		ENDTABLE
+	\stoptyping
+	\stopnarrower
+	\stoppacked
+
+	Operations are build the same way than with B-method, that is they change the state of the theory they belong to.
+
+	%\section{Formalisation}
+	%The specification developers choose to build is based on temporal concepts:
+	%Formalisation in this case is expressed by mean of \quotation{conditional invariants based on temporal concepts} (see \cite[SAFERPVS][extra={,page 5}]}).
+
+	\section{VDM and the SAFER study case}
+
+	The VDM team chose to undertake developing the SAFER system in the same way PVS developers did, that is with mean of a control cycle function. Moreover VDM-SL (the language used with VDM) is not as intuitive as B language, and therefore it is hard to draw conclusion from the report \cite[SAFERVDM]. Unfortunately this report does not include information on data reification so it will not be addressed here.
+
+	\indenting[no]
+
+	As B-method here and PVS, VDM developers used enumerated types for axis commands, translation and rotation axis. As well, relation of translation and rotation are expressed in the same way, {\em i.e.}:
+
+	\startnarrower
+	\type{TranCommand = TranAxis} $\longrightarrow$ \type{AxisCommand}
+	\stopnarrower
+
+	Thruster selection logic is quite straight forward as well. This is how the function representing the selection logic is typed.
+
+	\startnarrower
+	\type{Thrusters : AxisCommand} $\times$ \type{AxisCommand} $\times$ \type{AxisCommand} $\longrightarrow$ \type{ThrusterSet} $\times$ \type{ThrusterSet}
+	\stopnarrower
+
+	Here is presented the actual selection logic table. \type{mk-SET} is used to contruct an element of a record type SET, which is an implementation of the record SET.
+
+	\startnarrower
+	\type{Thrusters(A,B,C) =} \crlf
+	\type{cases mk-(A,B,C):}\crlf
+	\type{mk-(NEG,ZERO,ZERO)} $\longrightarrow$ \type+mk-({B1,B2,B3,B4})+ \crlf
+	\type{mk-(POS,ZERO,ZERO)} $\longrightarrow$ \type+mk-({F1,F2,F3,F4})+ \crlf
+	\type{mk-(ZERO,ZERO,ZERO)} $\longrightarrow$ \type+mk-({})+ \crlf
+	\type{mk-(...)} $\longrightarrow$ \type+mk-({...})+ \crlf
+	\type{end;}
+	\stopnarrower
+
+	The selection logic is however quite limited as it is defined within an operation body and not within an invariant.
+
+	There is not lot more to say on SAFER study case using VDM. The report is quite short, does not address data reification (refinement) but you can see the general way of programming with VDM applied to this particular case that is SAFER.
+
+	\indenting[yes]
+	\section{Conclusion}
+
+	It is not easy to fully cover these two methods comparing with B-method because they do not cover the same implementation of the SAFER system. However we saw that there was some important differences. B-method is still easier to formalize thanks to the use of both set theory and predicate logic, and some structure, in particular in PVS are really easier to implement thanks to the language used. But the key strength of the B-Method compared to these two method is that it can generate code. It is really a major asset over its rivals.
+
+	%%%%%%%%%%%%%%%%%%%%%%%%
+	%% DISCUSSION %%
+	%% the main achievements of this work, in relation to the initial to objectives as well as similar work by others
+	%% the main limitations of this work
+	%% possible extensions or future work
+	%%%%%%%%%%%%%%%%%%%%%%%%
+	%\chapter{Discussion}
+
+	%%%%%%%%%%%%%%%%%%%%%%%%
+	%% CONCLUSION %%
+	%%%%%%%%%%%%%%%%%%%%%%%%
+	\chapter{Conclusion \& future work}
+
+	Formal methods have been used for many years now, and the global scientific community try to carry out research for improving these methods. Some are efficient, some less, some provide concrete solutions that support the development of safe and secure software systems. This is the main idea behind B-Method, it aim to cover the spectrum of design through to coding. This method has many advantages over its rivals.
+
+	The use of different levels of abstraction, even though the refinement step is not easy, the B-Method represents probably the most successful application of formal methods to software development. It is really intuitive to specify an informal specification by means of set theory and predicate logic, without worrying about implementation details. PVS for instance uses specific structures close to implementation that does not allow much flexibility. VDM is more flexible on this aspect but cannot generate code and the readability of the code is not obvious for whom has not been acquainted with the language (this is not the case with B-Method where if you understand mathematics it is quite easy to understand an invariant). Besides VDM and PVS only provide a way to verify a specification is correct. That is why B-method is really a major breakthrough among formal methods, allowing both abstract specification and implementation keeping the verification process all the way long. This was a main concern, since the step from the former to the latter was not under verification with previous formal methods. Therefore leading to a lower level of trust.
+
+	B-Method has been used for many important critical project, like the subway line \#14 in Paris. The firm Clearsy which is responsible for the distribution of B-Method tools as well as the promotion of it is currently undertaking several important project, mostly railway control systems, throughout all over the world. More information on the B-Method can be seen on \type{www.methode-b.com}, as well as on the website of the company Clearsy \type{www.clearsy.com}.
+
+	\crlf
+
+	This project allowed me to develop a deeper understanding of some aspects of how the B-method works through the SAFER example. There are some limitations to the use of B-Method, that are more linked in general with the use of formal methods. How can the method be trusted or how can the method be mastered for instance? Formal methods are not the panacea for a safe system developement and so is not B-Method. Indeed the usage of such approaches requires a high level of skills.
+
+	Despite being able to identify some aspects of B-method, the project did not meet the goal planned. Limitations mostly due to errors of the design conception, but in particular to the use of AtelierB. Indeed the last version provided is not fully working, and some librairies important for a development project where missing. There are several aspects of future developments that need to be underlined. A second point of this future development would be to use another design choice, that is by mean of \type{INCLUDES} clause within abstract machines. These are the two main tasks to be undertook in order to completely fulfil this project.
+
+	Moreover, as mentioned in this report the use of formal approaches has to rely on a set of tools, designed as an implementation of the formal method. For now B-Method seems only limited by the set of tools implementing it.
+	%However the company responsible for the B-method provides a set of tools that are not mature enough for some of them. Indeed the typechecking tool, B compiler or translator are fine, but the interface developed to use them is not fully working. It lead to significant delays in the project.
+
+\stopbodymatter
+
+\startbackmatter
+	\setuplist[pubs][before=\blank]
+	\completepublications[criterium=all]
+\stopbackmatter
+
+\startappendices
+
+\chapter[a-design]{Schema of the software design}
+	\placefigure[here][design-complicated]
+		{Schema of the software design.}
+		{\externalfigure[design.png][height=20cm]}
+
+\chapter[requirement]{Requirements}
+
+Here are presented  the requirements that were in the design document.
+
+	\startitemize[n,packed]
+	\item The avionics software shall reference all commands and maneuvers to the coordinate system defined in \in{figure}[thrustername].
+	\item The avionics software shall provide a six degree-of-freedom maneuvering control capability in response to crewmember-initiated commands from the hand controller module.
+	\item The avionics software shall allow a crewmember with a single command to cause
+the measured SAFER rotation rates to be reduced to less than 0.3 degree per
+second in each of the three rotational axes.
+	\item  The avionics software shall attempt to maintain the calculated attitude within \math{\pm}5
+degrees of the attitude at the time the measured rates were reduced to the 0.3
+degree per second limit.
+	\item The avionics software shall disable AAH on an axis if a crewmember rotation
+command is issued for that axis while AAH is active.
+	\item Any hand controller rotation command present at the time AAH is initiated shall
+subsequently be ignored until a return to the off condition is detected for that axis
+or until AAH is disabled.
+	\item Hand controller rotation commands shall suppress any translation commands that
+are present, but AAH-generated rotation commands may coexist with translations.
+	\item At most one translation command shall be acted upon, with the axis chosen in
+priority order X, Y, Z.
+	\item The avionics software shall provide accelerations with a maximum of four simultaneous
+thruster firing commands.
+	\item The avionics software shall select thrusters in response to integrated AAH and
+crew-generated commands according to \in{table}[selectionlogicxpy] and \in{table}[selectionlogicyzr].
+	\item The avionics software shall accept the following data from the hand controller
+module:
+		\startitemize[2,packed]
+		\item + pitch
+		\item - pitch
+		\item + X, - X
+		\item + yaw or + Y, - yaw or - Y
+		\item + roll or + Z, - roll or - Z
+		\item Power switch
+		\item Mode switch
+		\item Display proceed switch
+		\item AAH pushbutton
+		\stopitemize
+	\item The avionics software shall provide flight control for AAH using the IRU-measured
+rotation rates and rate sensor temperatures.
+
+	\item The avionics software shall accept the following data from the inertial reference
+unit:
+		\startitemize[2,packed]
+		\item Roll, pitch, and yaw rotation rates
+		\item Roll, pitch, and yaw sensor temperatures
+		\item X, Y, and Z linear accelerations
+		\stopitemize
+
+
+	\item The avionics software shall provide the following data to the valve drive assemblies
+for each of the 24 thrusters:
+		\startitemize[2,packed]
+		\item Thruster on/off indications
+		\stopitemize
+
+	\item The avionics software shall provide the following data to the HCM for display:
+		\startitemize[2,packed]
+		\item Rotation rates and displacements
+		\item Miscellaneous status messages
+		\stopitemize
+
+	\item The avionics software shall provide the following data to the data recorder assembly:
+		\startitemize[2,packed]
+		\item IRU-sensed rotation rates
+		\item IRU-sensed linear accelerations
+		\item IRU rate sensor temperatures
+		\item Angular displacements
+		\item AAH command status
+		\stopitemize
+	\stopitemize
+
+	Requirements 1 to 14 are high level requirements whereas requirements 15 and 16 are low requirements.
+
+\chapter[dico]{Dictionnary of terms used}
+
+\definition{$\mapsto$ (maplet)} mathematical notation that denotes a pair of elements. For instance $Heriot$-$Watt$~$\mapsto$ $Edinburgh$ also written $(Heriot$-$Watt,Edinburgh)$. \par
+
+\definition{Bijection, $\rightarrowtail\!\!\!\!\!\rightarrow$ in B} a function that associates two sets such that one member of its domain is paired with one member of its range. A bijection is a {\em surjective and injective function} \par
+
+\definition{Cardinality of a set} number of elements within a set. \par
+
+\definition{Cardinality of a relation} number of pairs of elements within the relation. \par
+
+\definition{Cartesian product, $\times$ in B} relation that associates each element of its source set to all elements of its target set.
+
+\definition{Domain of a relation} considering a relation $R$ from $S$(the source set of R) to $T$(the target set of R), $R \in S \leftrightarrow T$. The domain of $R$ is the set of the elements of $S$ connected to one or several elements of $T$. The range of $R$ is the set of the elements of $T$ connected to one or several elements of $S$. \par
+
+\definition{Injective, $\rightarrowtail$ in B} a function that associates two sets such that all members of its domain are paired with a member of its range. \par
+
+\definition{Partial function, $\longrightarrow\!\!\!\!\!\!\mapsto$ in B} a function that assiociates one and only once some element of its domain to an element of its range. \par
+
+\definition{Range of a relation} see \quote{\em Domain of a relation}. \par
+
+\definition{Surjective, $\twoheadrightarrow$ in B} a function that associates two sets such that all members of its range are paired with a member of its domain. \par
+
+\definition{Total function, $\longrightarrow$ in B} an injective function that associates one and only once each element of its domain to an element of its range. \par
+
+
+
+
+\chapter[code]{Code}
+
+\section[code-safertype]{SAFER TYPE}
+\loadB{SAFER-TYPE}
+
+\section[code-cmdint]{COMMAND INTERPRETER}
+\loadB{COMMAND-INTERPRETER-mch}
+
+\section[code-cmdint-imp]{COMMAND INTERPRETER implementation}
+\loadB{COMMAND-INTERPRETER-imp}
+
+\section[code-thrsel]{THRUSTER SELECTION}
+\loadB{THRUSTER-SELECTION-mch}
+
+\section[code-thrsel-imp]{THRUSTER SELECTION implementation}
+\loadB{THRUSTER-SELECTION-imp}
+
+\section[code-basic-translation]{BASIC TRANSLATION}
+\loadB{BASIC-TRANSLATION}
+
+\section[code-basic-translation-imp]{BASIC TRANSLATION implementation}
+\loadB{BASIC-TRANSLATION-imp}
+
+\section[code-basic-rotation]{BASIC ROTATION}
+\loadB{BASIC-ROTATION}
+
+\section[code-basic-rotation-imp]{BASIC ROTATION implementation}
+\loadB{BASIC-ROTATION-imp}
+
+\section[code-basic-power-switch]{BASIC POWER SWITCH}
+\loadB{BASIC-POWER-SWITCH}
+
+\section[code-basic-power-switch-imp]{BASIC POWER SWITCH implementation}
+\loadB{BASIC-POWER-SWITCH-imp}
+
+\section[code-basic-tsl]{BASIC TSL}
+\loadB{BASIC-TSL}
+
+\section[code-basic-tsl-imp]{BASIC TSL implementation}
+\loadB{BASIC-TSL-imp}
+
+\section[code-AVIONICS]{AVIONICS}
+\loadB{AVIONICS}
+
+\section[code-AVIONICS-imp]{AVIONICS implementation}
+\loadB{AVIONICS-imp}
+
+\chapter{ASCII translation of B symbols}
+
+See two next pages!
+
+\stopappendices
+
+\stoptext
